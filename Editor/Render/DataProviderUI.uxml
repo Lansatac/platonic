@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <uie:PropertyField name="Data" binding-path="ScriptableData" label="Data" />
+    <uie:PropertyField binding-path="Fields" name="Fields" label="Fields" />
+    <ui:Label tabindex="-1" text="Data Contents:" display-tooltip-when-elided="true" />
+    <ui:ListView focusable="true" name="DataFieldsPreview" header-title="Data Contents:" virtualization-method="FixedHeight" fixed-item-height="15" show-border="true" />
+</ui:UXML>
