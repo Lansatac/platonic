@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Platonic.Core
 {
@@ -9,17 +10,29 @@ namespace Platonic.Core
         Type FieldType { get; }
     }
     
-    public struct FieldName<T> : IFieldName
+    public interface IFieldName<out T> : IFieldName
     {
+        
+    }
+    
+    [Serializable]
+    public class FieldName<T> : IFieldName<T>
+    {
+        [SerializeField]
+        private ulong _id;
+
+        [SerializeField]
+        private string _name;
+
         public FieldName(ulong id, string name)
         {
-            ID = id;
-            Name = name;
+            _id = id;
+            _name = name;
         }
 
-        public ulong ID { get; }
+        public ulong ID => _id;
 
-        public string Name { get; }
+        public string Name => _name;
 
         public Type FieldType => typeof(T);
     }

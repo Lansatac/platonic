@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Platonic.Core;
 using Platonic.Scriptable;
@@ -8,9 +7,9 @@ using UnityEngine;
 
 namespace Platonic.Render
 {
-    public class DataProvider : MonoBehaviour
+    public class DataProvider : MonoBehaviour, ISerializationCallbackReceiver
     {
-        public readonly VersionedReference<IData> Data = new VersionedReference<IData>();
+        public readonly VersionedReference<IData> Data = new();
 
         [SerializeField]
         private ScriptableData? ScriptableData;
@@ -18,29 +17,41 @@ namespace Platonic.Render
         [SerializeField]
         private List<ScriptableField>? Fields;
 
-        private void OnValidate()
+        /// <summary>
+        /// Data object that represents the data as serialized on the provider, if any.
+        /// </summary>
+        public IData? InitialData
         {
-            IData? newData = null;
-
-            if (Fields != null)
+            get
             {
-                IEnumerable<IField> fields = Fields;
-                if (ScriptableData != null)
+                IData? newData = null;
+
+                if (Fields is { Count: > 0 })
                 {
-                    fields = fields.Concat(ScriptableData.Fields);
+                    IEnumerable<IField> fields = Fields.Where(field => field != null);
+                    if (ScriptableData != null)
+                    {
+                        fields = fields.Concat(ScriptableData.Fields);
+                    }
+
+                    newData = new Data(fields);
+                }
+                else if (ScriptableData != null)
+                {
+                    newData = ScriptableData;
                 }
 
-                newData = new Data(fields);
+                return newData;
             }
-            else if (ScriptableData != null)
-            {
-                newData = ScriptableData;
-            }
+        }
 
-            if (newData != null)
-            {
-                Data.Ref = newData;
-            }
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+        }
+
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            Data.Ref = InitialData;
         }
     }
 }

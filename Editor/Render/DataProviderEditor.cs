@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Platonic.Core;
 using Platonic.Render;
 using UnityEditor;
@@ -49,12 +51,38 @@ namespace Platonic.Editor.Render
                 {
                     var field = dataProvider.Data.Ref.Fields.ElementAt(i);
                     element.Q<Label>("NameLabel").text = $"{field.Name.Name}({field.Name.FieldType.Name}):";
-                    element.Q<Label>("ValueLabel").text = $"{field.Value}";
+                    element.Q<Label>("ValueLabel").text = $"{FieldValueString(field.Value)}";
                 };
                 list.itemsSource = dataProvider.Data.Ref.Fields.ToList();
                 list.focusable = false;
             }
             return root;
+        }
+
+        string FieldValueString(object? fieldValue)
+        {
+            if (fieldValue == null)
+            {
+                return "null";
+            }
+
+            if (fieldValue is string value)
+            {
+                return value;
+            }
+
+            if (fieldValue is IEnumerable list)
+            {
+                var elements = new List<string>();
+                foreach (var element in list)
+                {
+                    elements.Add(FieldValueString(element));
+                }
+
+                return $"[{string.Join(", ", elements)}]";
+            }
+
+            return $"{fieldValue}";
         }
     }
 }

@@ -1,27 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Platonic.Core;
-using UnityEngine;
 
-namespace Platonic.Scriptable
+namespace Platonic.Serializable
 {
-    public abstract class ScriptableData : ScriptableObject, IData
+    public abstract class SerializableData : IData
     {
         private Data? _data;
-        protected IData Data {
+
+        private Data Data
+        {
             get
             {
-                if (_data == null)
-                {
-                    _data = new Data(GetFields());
-                }
-
+                _data ??= new Data(GetFields());
                 return _data;
             }
         }
 
-        public IEnumerable<IField> Fields => Data.Fields;
-        protected abstract IEnumerable<IField> GetFields();
+        public IEnumerable<IField> Fields => Data;
 
+        protected abstract IEnumerable<IField> GetFields();
+        
         public bool HasField(IFieldName fieldName)
         {
             return Data.HasField(fieldName);

@@ -17,7 +17,7 @@ namespace Platonic.Scriptable
         protected abstract object? GetValue();
     }
 
-    public abstract class ScriptableField<T> : ScriptableField, IField<T>
+    public abstract class ScriptableField<T> : ScriptableField, IField<T>, ISerializationCallbackReceiver
     {
         IFieldName IField.Name => Name;
         object IField.Value => Value!;
@@ -25,14 +25,14 @@ namespace Platonic.Scriptable
         private T? _cachedValue;
         [SerializeField] private T? _value;
 
-        private void OnValidate()
+        protected virtual T? GetSerializedValue()
         {
-            Value = _value!;
+            return _value;
         }
 
         public T Value
         {
-            get => _cachedValue ?? _value!;
+            get => _cachedValue ?? GetSerializedValue()!;
             set
             {
                 if (!EqualityComparer<T?>.Default.Equals(_cachedValue, value))
@@ -44,7 +44,7 @@ namespace Platonic.Scriptable
         }
 
         [SerializeField] private SerializableFieldName<T>? _name;
-        public FieldName<T> Name => _name!.AsName();
+        public IFieldName<T> Name => _name!.AsName();
         
         public ulong Version { get; private set; } = Versions.Initial;
 
@@ -61,6 +61,15 @@ namespace Platonic.Scriptable
         protected override IFieldName GetName()
         {
             return Name;
+        }
+
+        public void OnBeforeSerialize()
+        {
+        }
+
+        public void OnAfterDeserialize()
+        {
+            Value = GetSerializedValue()!;
         }
     }
 }

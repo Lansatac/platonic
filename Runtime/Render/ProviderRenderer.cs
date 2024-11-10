@@ -1,5 +1,4 @@
-﻿using System;
-using Platonic.Core;
+﻿using Platonic.Core;
 using Platonic.Version;
 using UnityEngine;
 
@@ -7,20 +6,36 @@ namespace Platonic.Render
 {
     public abstract class ProviderRenderer : MonoBehaviour
     {
-        
         private DataProvider? _provider;
         private ulong _cachedProviderVersion = Versions.None;
 
         protected void Awake()
         {
-            _provider = GetComponentInParent<DataProvider>();
             ProviderAwake();
-            OnDataChanged();
+            UpdateProvider();
+        }
+
+        private void OnEnable()
+        {
+            _provider = LocateProvider();
+            UpdateProvider();
+        }
+
+        protected virtual DataProvider LocateProvider()
+        {
+            return GetComponentInParent<DataProvider>();
         }
 
         protected virtual void ProviderAwake() { }
 
-        protected void Update()
+        protected void LateUpdate()
+        {
+            UpdateProvider();
+
+            ProviderLateUpdate();
+        }
+
+        protected void UpdateProvider()
         {
             if (_provider == null) return;
 
@@ -29,19 +44,11 @@ namespace Platonic.Render
                 _cachedProviderVersion = _provider.Data.Version;
                 OnDataChanged();
             }
-            
-            ProviderUpdate();
         }
 
-        protected virtual void ProviderUpdate() { }
+        protected virtual void ProviderLateUpdate() { }
 
-        public IData? Data {
-            get
-            {
-
-                return _provider?.Data.Ref;
-            }
-        }
+        public IData? Data => _provider?.Data.Ref;
 
         protected abstract void OnDataChanged();
     }

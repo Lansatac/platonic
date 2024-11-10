@@ -38,6 +38,10 @@ namespace Platonic.Core
             return _namesByID.Values.Where(name => name.FieldType == type);
         }
 
+        public IEnumerable<IFieldName> GetAssignableToType(Type type)
+        {
+            return _namesByID.Values.Where(name => type.IsAssignableFrom(name.FieldType));
+        }
         public IFieldName GetName(ulong id)
         {
             if (!TryGetName(id, out var name))
@@ -66,14 +70,14 @@ namespace Platonic.Core
             return _namesByName.TryGetValue(fieldName, out name);
         }
         
-        public FieldName<T> GetName<T>(ulong id)
+        public IFieldName<T> GetName<T>(ulong id)
         {
             if (!_namesByID.TryGetValue(id, out var name))
             {
                 throw new Exception($"No field with id {id} was previously registered!");
             }
 
-            if (name is not FieldName<T> typedName)
+            if (name is not IFieldName<T> typedName)
             {
                 throw new Exception($"Field name {name.ID}:{name.Name} was registered as {name.FieldType.Name} but requested as {typeof(T).Name}!");
             }

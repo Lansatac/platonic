@@ -29,5 +29,8 @@ namespace Platonic.Editor.Scriptable
     
     [CustomEditor(typeof(ScriptableBoolField))]
     public class ScriptableBoolFieldEditor : ScriptableFieldEditor { }
+    
+    [CustomEditor(typeof(ScriptableDataField))]
+    public class ScriptableDataFieldEditor : ScriptableFieldEditor { }
 
 }

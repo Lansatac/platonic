@@ -1,12 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace Platonic.Core
 {
-    public interface IData
+    public interface IData : IEnumerable<IField>
     {
         IEnumerable<IField> Fields { get; }
 
-        IField GetField(IFieldName name);
-        IField<T> GetField<T>(FieldName<T> name);
+        bool HasField(IFieldName fieldName);
+        
+        IField GetField(IFieldName fieldName);
+        IField<T> GetField<T>(IFieldName<T> fieldName);
+
+        IEnumerator<IField> IEnumerable<IField>.GetEnumerator()
+        {
+            return Fields.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

@@ -16,9 +16,9 @@ namespace Platonic.Render
             _button = GetComponent<Button>();
         }
 
-        protected override void FieldChanged(IField<bool> field)
+        protected override void FieldChanged(bool newValue)
         {
-            if (_button != null) _button.interactable = Invert ? !field.Value : field.Value;
+            if (_button != null) _button.interactable = Invert ? !newValue : newValue;
         }
     }
 }

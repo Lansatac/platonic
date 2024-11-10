@@ -19,7 +19,7 @@ namespace Platonic.Scriptable
     {
         public ulong ID;
 
-        public FieldName<T> AsName()
+        public IFieldName<T> AsName()
         {
             return Names.Instance.GetName<T>(ID);
         }

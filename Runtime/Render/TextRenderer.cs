@@ -43,7 +43,7 @@ namespace Platonic.Render
             _cachedFieldVersions = Versions.None;
         }
 
-        protected override void ProviderUpdate()
+        protected override void ProviderLateUpdate()
         {
             if (Text == null) return;
             if(Data == null) return;
@@ -64,7 +64,10 @@ namespace Platonic.Render
             
             foreach (var field in _fieldsToWatch)
             {
-                version += Data.GetField(field).Version;
+                if (Data.HasField(field))
+                {
+                    version += Data.GetField(field).Version;
+                }
             }
 
             return version;

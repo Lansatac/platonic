@@ -2,6 +2,7 @@
 using Platonic.Core;
 using Platonic.Scriptable;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Platonic.Editor.Scriptable
@@ -42,6 +43,27 @@ namespace Platonic.Editor.Scriptable
 
             return container;
         }
+        
+        
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            var allNames = Names.Instance.GetAllNames().ToList();
+            var nameOptions = allNames.Select(fieldName => fieldName.Name).ToArray();
+            
+            var idProperty = property.FindPropertyRelative("ID");
+            int index = 0;
+            if (Names.Instance.TryGetName(idProperty.ulongValue, out var name))
+            {
+                index = allNames.IndexOf(name);
+            }
+            else
+            {
+                idProperty.ulongValue = allNames[index].ID;
+                property.serializedObject.ApplyModifiedProperties();
+            }
+            var newIndex = EditorGUILayout.Popup(index, nameOptions, GUILayout.MinWidth(100));
+            idProperty.ulongValue = allNames[newIndex].ID;
+        }
     }
     
     [CustomPropertyDrawer(typeof(SerializableFieldName<>))]
@@ -54,7 +76,7 @@ namespace Platonic.Editor.Scriptable
 
             var nameType = fieldInfo.FieldType.GetGenericArguments()[0];
 
-            var allNames = Names.Instance.GetNamesOfType(nameType).ToList();
+            var allNames = Names.Instance.GetAssignableToType(nameType).ToList();
             var nameOptions = allNames.Select(fieldName => fieldName.Name).ToList();
             
             var idProperty = property.FindPropertyRelative("ID");
@@ -80,6 +102,29 @@ namespace Platonic.Editor.Scriptable
             container.Add(nameDropdownField);
 
             return container;
+        }
+        
+         
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            var nameType = fieldInfo.FieldType.GetGenericArguments()[0];
+
+            var allNames = Names.Instance.GetAssignableToType(nameType).ToList();
+            var nameOptions = allNames.Select(fieldName => fieldName.Name).ToArray();
+            
+            var idProperty = property.FindPropertyRelative("ID");
+            int index = 0;
+            if (Names.Instance.TryGetName(idProperty.ulongValue, out var name))
+            {
+                index = allNames.IndexOf(name);
+            }
+            else
+            {
+                idProperty.ulongValue = allNames[index].ID;
+                property.serializedObject.ApplyModifiedProperties();
+            }
+            var newIndex = EditorGUILayout.Popup(index, nameOptions, GUILayout.MinWidth(100));
+            idProperty.ulongValue = allNames[newIndex].ID;
         }
     }
 }
