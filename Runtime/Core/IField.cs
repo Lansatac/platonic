@@ -1,4 +1,5 @@
-﻿using Platonic.Version;
+﻿#nullable enable
+using Platonic.Version;
 
 namespace Platonic.Core
 {

@@ -1,4 +1,5 @@
-﻿using Platonic.Core;
+﻿#nullable enable
+using Platonic.Core;
 using UnityEngine;
 
 namespace Platonic.Scriptable

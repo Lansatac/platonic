@@ -1,4 +1,5 @@
-﻿namespace Platonic.Core
+﻿#nullable enable
+namespace Platonic.Core
 {
     public static class FieldExtensions
     {

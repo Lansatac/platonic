@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+using System.Collections.Generic;
 using System.Linq;
 using Platonic.Core;
 using Platonic.Scriptable;
@@ -33,6 +34,7 @@ namespace Platonic.Render
                     {
                         fields = fields.Concat(ScriptableData.Fields);
                     }
+
 
                     newData = new Data(fields);
                 }

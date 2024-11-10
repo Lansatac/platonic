@@ -1,4 +1,5 @@
-﻿namespace Platonic.Version
+﻿#nullable enable
+namespace Platonic.Version
 {
     public class VersionedReference<T> : IVersioned
         where T : class

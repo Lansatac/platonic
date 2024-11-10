@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using Platonic.Core;
 using Platonic.Scriptable;
 using Platonic.Version;
