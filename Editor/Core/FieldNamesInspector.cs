@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Platonic.Editor.Generator;
 using UnityEditor;
 using UnityEditor.UIElements;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Platonic.Editor.Core
@@ -17,6 +16,7 @@ namespace Platonic.Editor.Core
             "int",
             "float",
             "string",
+            "bool",
             
             "custom"
         });
@@ -33,6 +33,8 @@ namespace Platonic.Editor.Core
             var nameList = namesInspector.Q<ListView>("NameList");
             nameList.bindItem += (element, i) =>
             {
+                if (i >= serializableNames.arraySize)
+                    serializableNames.arraySize = i+1;
                 var serializableElement = serializableNames.GetArrayElementAtIndex(i);
                 if (serializableElement == null) return;
                 var fn = (FieldNames.FieldName)serializableElement.boxedValue;
@@ -51,7 +53,6 @@ namespace Platonic.Editor.Core
                 typeName.style.visibility = typeProperty.stringValue == "custom" ? Visibility.Visible : Visibility.Hidden;
                 dropdownField.RegisterValueChangedCallback(evt =>
                 {
-                    Debug.Log(evt.newValue);
                     typeName.style.visibility = evt.newValue == "custom" ? Visibility.Visible : Visibility.Hidden;
                     if (evt.newValue != "custom")
                     {
