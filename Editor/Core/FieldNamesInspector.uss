@@ -1,0 +1,10 @@
+.unity-base-field__label {
+    flex-direction: row;
+    max-width: initial;
+    width: auto;
+    min-width: initial;
+}
+
+.unity-text-field > #unity-text-input {
+    flex-grow: 1;
+}

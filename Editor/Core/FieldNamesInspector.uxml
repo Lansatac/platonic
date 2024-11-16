@@ -1,0 +1,7 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Packages/platonic/Editor/Core/FieldNamesInspector.uss?fileID=7433441132597879392&amp;guid=939420547ce6bf84ebe0ef5176704389&amp;type=3#FieldNamesInspector" />
+    <engine:TextField label="Output Path:" placeholder-text="path..." binding-path="OutputPath" class="unity-base-field__aligned" />
+    <engine:TextField label="Namespace:" placeholder-text="namespace..." binding-path="Namespace" />
+    <engine:ListView binding-path="Names" item-template="project://database/Packages/platonic/Editor/Core/FieldName.uxml?fileID=9197481963319205126&amp;guid=b0da922c2a8d5ec418f4f0408fc76107&amp;type=3#FieldName" reorderable="true" name="NameList" show-add-remove-footer="true" header-title="Names" reorder-mode="Animated" />
+    <engine:Button text="Generate" name="GenerateButton" />
+</engine:UXML>

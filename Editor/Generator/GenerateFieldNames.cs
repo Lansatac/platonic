@@ -1,7 +1,7 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEditor;
@@ -64,6 +64,7 @@ namespace Platonic.Editor.Generator
         {
             foreach (var names in allNames)
             {
+                HashSet<string> usedNames = new();
                 var generatedFile =
                     new FileInfo($"{Path.Combine("Assets/" + names.OutputPath, names.Namespace)}.generated.cs");
                 generatedFile.Directory!.Create();
@@ -82,15 +83,23 @@ namespace Platonic.Editor.Generator
                     "\t{\n");
                 foreach (var name in names.Names)
                 {
-                    source.AppendLine(
-                        $"\t\tpublic static FieldName<{name.Type}> {name.Name} = Platonic.Core.Names.Register<{name.Type}>(nameof({name.Name}));");
+                    if (!usedNames.Contains(name.Name))
+                    {
+                        source.AppendLine(
+                            $"\t\tpublic static FieldName<{name.Type}> {name.Name} = Platonic.Core.Names.Register<{name.Type}>(\"{names.Namespace}.\" + nameof({name.Name}));");
+                        usedNames.Add(names.name);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Duplicate name {names.name}!");
+                    }
                 }
 
                 source.Append("\t}\n" +
                               "}\n");
                 writer.Write(source);
             }
-            
+
             EditorPrefs.SetString($"{Application.dataPath}.Platonic.GeneratorHash", hash);
 
             AssetDatabase.Refresh();
