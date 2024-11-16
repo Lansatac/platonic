@@ -92,7 +92,7 @@ namespace Platonic.Editor.Generator
                     }
                     else
                     {
-                        Debug.LogWarning($"Duplicate name {names.name}!");
+                        Debug.LogWarning($"Duplicate name {name.Name}!");
                     }
                 }
 
