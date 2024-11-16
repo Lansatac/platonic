@@ -64,7 +64,6 @@ namespace Platonic.Editor.Generator
         {
             foreach (var names in allNames)
             {
-                HashSet<string> usedNames = new();
                 var generatedFile =
                     new FileInfo($"{Path.Combine("Assets/" + names.OutputPath, names.Namespace)}.generated.cs");
                 generatedFile.Directory!.Create();
@@ -81,13 +80,15 @@ namespace Platonic.Editor.Generator
                     "{\n" +
                     "\tclass Names\n" +
                     "\t{\n");
+                
+                HashSet<string> usedNames = new();
                 foreach (var name in names.Names)
                 {
                     if (!usedNames.Contains(name.Name))
                     {
                         source.AppendLine(
                             $"\t\tpublic static FieldName<{name.Type}> {name.Name} = Platonic.Core.Names.Register<{name.Type}>(\"{names.Namespace}.\" + nameof({name.Name}));");
-                        usedNames.Add(names.name);
+                        usedNames.Add(name.Name);
                     }
                     else
                     {
