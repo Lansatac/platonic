@@ -1,8 +1,9 @@
 ﻿#nullable enable
 using System.Collections;
 using System.Collections.Generic;
+using Platonic.Core;
 
-namespace Platonic.Core
+namespace Platonic
 {
     public interface IData : IEnumerable<IField>
     {

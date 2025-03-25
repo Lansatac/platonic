@@ -2,9 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Platonic.Core;
 using UnityEngine;
 
-namespace Platonic.Core
+namespace Platonic
 {
     public class Data : IData
     {

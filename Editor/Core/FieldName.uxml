@@ -1,8 +1,8 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Packages/platonic/Editor/Core/FieldNamesInspector.uss?fileID=7433441132597879392&amp;guid=939420547ce6bf84ebe0ef5176704389&amp;type=3#FieldNamesInspector" />
     <engine:VisualElement style="flex-grow: 0; flex-direction: row; height: 22px; flex-basis: auto;">
-        <engine:TextField label="Name:" placeholder-text="name..." binding-path="Name" name="FieldName" style="flex-grow: 1; align-content: auto; flex-direction: row; align-self: flex-start;" />
-        <engine:DropdownField label="Type:" name="TypeDropdown" style="flex-direction: row; flex-grow: 0; min-width: 160px; max-width: initial;" />
-        <engine:TextField placeholder-text="type..." binding-path="Type" name="TypeName" style="flex-direction: row; display: flex; flex-grow: 1;" />
+        <engine:TextField label="Name:" placeholder-text="name..." binding-path="Name" name="FieldName" data-source-type="Platonic.Core.SerializableFieldNameDefinition, Platonic.Runtime" data-source-path="Name" style="flex-grow: 1; align-content: auto; flex-direction: row; align-self: flex-start;" />
+        <engine:DropdownField label="Type:" name="TypeDropdown" data-source-type="Platonic.Core.SerializableFieldNameDefinition, Platonic.Runtime" data-source-path="Type" binding-path="Type" style="flex-direction: row; flex-grow: 0; min-width: 160px; max-width: initial;" />
+        <engine:TextField placeholder-text="type..." name="TypeName" binding-path="CustomTypeName" data-source-path="SerializableFieldNameDefinition" style="flex-direction: row; display: flex; flex-grow: 1;" />
     </engine:VisualElement>
 </engine:UXML>
