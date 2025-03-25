@@ -16,7 +16,7 @@ namespace Platonic.Editor.Render
     {
         
         public VisualTreeAsset? InspectorXML;
-        public VisualTreeAsset? FieldPreview;
+        public VisualTreeAsset? PreviewField;
         public override VisualElement CreateInspectorGUI()
         {
             var dataProvider = (DataProvider)target;

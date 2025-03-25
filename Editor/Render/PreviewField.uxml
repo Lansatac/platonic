@@ -1,0 +1,10 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+        <engine:Label text="Label" binding-path="_fieldName" style="min-width: 130px; max-width: 130px; width: 130px;" />
+        <editor:ToolbarMenu name="NameMenu" binding-path="_fieldName" />
+        <engine:IntegerField value="42" name="IntValue" binding-path="_intValue" password="false" />
+        <engine:FloatField value="42.2" name="FloatValue" binding-path="_floatValue" />
+        <engine:Toggle name="BoolValue" binding-path="_boolValue" />
+        <engine:TextField placeholder-text="preview value..." name="StringValue" binding-path="_stringValue" style="flex-grow: 1;" />
+    </engine:VisualElement>
+</engine:UXML>
