@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 
 namespace Platonic.Core
 {
@@ -24,7 +26,7 @@ namespace Platonic.Core
             return Name == other.Name && Type == other.Type;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is SerializableFieldNameDefinition other && Equals(other);
         }

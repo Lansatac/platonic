@@ -29,7 +29,7 @@ namespace Platonic.Render
         protected override void FieldChanged(IData newValue)
         {
             if (_forwardedProvider == null) throw new ArgumentNullException(nameof(_forwardedProvider));
-            _forwardedProvider.Data.Ref = newValue;
+            _forwardedProvider.DataReference.Ref = newValue;
         }
     }
 }

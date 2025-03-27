@@ -27,7 +27,7 @@ namespace Platonic.Editor.Render
             
             InspectorXML.CloneTree(root);
             
-            if (dataProvider.Data.Ref != null)
+            if (dataProvider.Data != null)
             {
                 
                 var list = root.Q<ListView>("DataFieldsPreview");
@@ -50,11 +50,11 @@ namespace Platonic.Editor.Render
                 };
                 list.bindItem = (element, i) =>
                 {
-                    var field = dataProvider.Data.Ref.Fields.ElementAt(i);
+                    var field = dataProvider.Data.Fields.ElementAt(i);
                     element.Q<Label>("NameLabel").text = $"{field.Name.Name}({field.Name.FieldType.Name}):";
                     element.Q<Label>("ValueLabel").text = $"{FieldValueString(field.Value)}";
                 };
-                list.itemsSource = dataProvider.Data.Ref.Fields.ToList();
+                list.itemsSource = dataProvider.Data.Fields.ToList();
                 list.focusable = false;
             }
             return root;

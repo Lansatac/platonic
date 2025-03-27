@@ -40,16 +40,16 @@ namespace Platonic.Render
         {
             if (_provider == null) return;
 
-            if (_cachedProviderVersion != _provider.Data.Version)
+            if (_cachedProviderVersion != _provider.DataReference.Version)
             {
-                _cachedProviderVersion = _provider.Data.Version;
+                _cachedProviderVersion = _provider.DataReference.Version;
                 OnDataChanged();
             }
         }
 
         protected virtual void ProviderLateUpdate() { }
 
-        public IData? Data => _provider?.Data.Ref;
+        public IData? Data => _provider?.Data;
 
         protected abstract void OnDataChanged();
     }

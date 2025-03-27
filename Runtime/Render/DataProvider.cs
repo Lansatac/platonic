@@ -11,14 +11,19 @@ namespace Platonic.Render
 {
     public class DataProvider : MonoBehaviour
     {
-        public readonly VersionedReference<IData> Data;
+        public IData? Data
+        {
+            get => DataReference.Ref;
+            set => DataReference.Ref = value;
+        }
+        public readonly VersionedReference<IData?> DataReference;
         
         [SerializeField]
         private List<PreviewField> PreviewFields = null!;
 
         public DataProvider()
         {
-            Data = new VersionedReference<IData>(() => InitialData);
+            DataReference = new VersionedReference<IData?>(() => InitialData);
         }
 
         /// <summary>

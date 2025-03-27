@@ -4,9 +4,9 @@ using System;
 namespace Platonic.Version
 {
     public class VersionedReference<T> : IVersioned
-        where T : class
+        where T : class?
     {
-        private readonly Func<T>? defaultValue;
+        private readonly Func<T>? _defaultValue;
         private T? _ref;
         private ulong _version = Versions.Initial;
         
@@ -14,9 +14,9 @@ namespace Platonic.Version
         {
             get
             {
-                if (_ref == null && defaultValue != null)
+                if (_ref == null && _defaultValue != null)
                 {
-                    _ref = defaultValue();
+                    _ref = _defaultValue();
                 }
                     
                 return _ref;
@@ -30,6 +30,8 @@ namespace Platonic.Version
                 Versions.Increment(ref _version);
             }
         }
+        
+        
 
         public VersionedReference()
         {
@@ -37,9 +39,9 @@ namespace Platonic.Version
         
         public VersionedReference(Func<T> defaultValue)
         {
-            this.defaultValue = defaultValue;
+            this._defaultValue = defaultValue;
         }
 
         public ulong Version => _version;
+        }
     }
-}

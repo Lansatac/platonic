@@ -1,3 +1,5 @@
+#nullable enable
+
 using System.Collections.Generic;
 using Platonic.Core;
 using UnityEngine;
@@ -11,9 +13,9 @@ namespace Platonic
 
         public string Namespace = "Namespace";
 
-        public List<string> AdditionalUsings;
+        public List<string> AdditionalUsings = null!;
         
-        public List<SerializableFieldNameDefinition> Names;
+        public List<SerializableFieldNameDefinition> Names = null!;
 
         public int GetSerializationHash()
         {
