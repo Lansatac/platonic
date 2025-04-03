@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using System;
-using Platonic.Scriptable;
 using Platonic.Version;
 using UnityEngine;
 

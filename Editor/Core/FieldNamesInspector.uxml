@@ -2,6 +2,7 @@
     <Style src="project://database/Packages/platonic/Editor/Core/FieldNamesInspector.uss?fileID=7433441132597879392&amp;guid=939420547ce6bf84ebe0ef5176704389&amp;type=3#FieldNamesInspector" />
     <engine:TextField label="Output Path:" placeholder-text="path..." binding-path="OutputPath" class="unity-base-field__aligned" style="align-items: auto;" />
     <engine:TextField label="Namespace:" placeholder-text="namespace..." binding-path="Namespace" style="align-items: flex-start;" />
+    <engine:TextField label="Class Name:" placeholder-text="class name..." binding-path="ClassName" style="align-items: flex-start;" />
     <engine:Foldout text="Additional Using Statements" value="false">
         <engine:ListView name="UsingsList" header-title="Additional Using Statements" reorder-mode="Animated" binding-path="AdditionalUsings" reorderable="true" show-add-remove-footer="true" />
     </engine:Foldout>

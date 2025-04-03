@@ -13,6 +13,8 @@ namespace Platonic
 
         public string Namespace = "Namespace";
 
+        public string ClassName = "Names";
+
         public List<string> AdditionalUsings = null!;
         
         public List<SerializableFieldNameDefinition> Names = null!;
