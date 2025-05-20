@@ -6,7 +6,6 @@ namespace Platonic.Editor.Tests
 {
     public class FieldTests
     {
-        private FieldNameRegistry _registry = new();
         private readonly FieldName<int> TestInt = new(1, nameof(TestInt)); 
     
     

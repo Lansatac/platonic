@@ -8,6 +8,8 @@ namespace Platonic.Render
     public abstract class ProviderRenderer : MonoBehaviour
     {
         private DataProvider? _provider;
+        protected DataProvider? Provider => _provider;
+        
         private ulong _cachedProviderVersion = Versions.None;
 
         protected void Awake()
@@ -16,10 +18,12 @@ namespace Platonic.Render
             UpdateProvider();
         }
 
-        private void OnEnable()
+        protected void OnEnable()
         {
             _provider = LocateProvider();
             UpdateProvider();
+            ProviderLateUpdate();
+            ProviderOnEnable();
         }
 
         protected virtual DataProvider LocateProvider()
@@ -28,7 +32,7 @@ namespace Platonic.Render
         }
 
         protected virtual void ProviderAwake() { }
-
+        protected virtual void ProviderOnEnable() { }
         protected void LateUpdate()
         {
             UpdateProvider();

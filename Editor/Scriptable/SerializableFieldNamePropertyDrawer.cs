@@ -45,6 +45,11 @@ namespace Platonic.Editor.Scriptable
             return container;
         }
         
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            // Ensure enough height for the dropdown within a list
+            return EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+        }
         
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -62,7 +67,18 @@ namespace Platonic.Editor.Scriptable
                 idProperty.ulongValue = allNames[index].ID;
                 property.serializedObject.ApplyModifiedProperties();
             }
-            var newIndex = EditorGUILayout.Popup(index, nameOptions, GUILayout.MinWidth(100));
+            
+            // Draw label and dropdown in a single line
+            var labelPosition = new Rect(position.x, position.y, EditorGUIUtility.labelWidth, EditorGUIUtility.singleLineHeight);
+            EditorGUI.LabelField(labelPosition, label);
+                
+            var dropdownPosition = new Rect(
+                position.x + EditorGUIUtility.labelWidth,
+                position.y,
+                position.width - EditorGUIUtility.labelWidth,
+                EditorGUIUtility.singleLineHeight);
+            
+            var newIndex = EditorGUI.Popup(dropdownPosition, index, nameOptions);
             idProperty.ulongValue = allNames[newIndex].ID;
         }
     }
@@ -70,7 +86,6 @@ namespace Platonic.Editor.Scriptable
     [CustomPropertyDrawer(typeof(SerializableFieldName<>))]
     public class SerializableFieldNamePropertyDrawer : PropertyDrawer
     {
-
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
             var container = new VisualElement();
@@ -105,7 +120,12 @@ namespace Platonic.Editor.Scriptable
             return container;
         }
         
-         
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            // Ensure enough height for the dropdown within a list
+            return EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+        }
+        
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var nameType = fieldInfo.FieldType.GetGenericArguments()[0];
@@ -124,7 +144,14 @@ namespace Platonic.Editor.Scriptable
                 idProperty.ulongValue = allNames[index].ID;
                 property.serializedObject.ApplyModifiedProperties();
             }
-            var newIndex = EditorGUILayout.Popup(index, nameOptions, GUILayout.MinWidth(100));
+            
+            // Draw label and dropdown in a single line
+            var labelPosition = new Rect(position.x, position.y, EditorGUIUtility.labelWidth, EditorGUIUtility.singleLineHeight);
+            EditorGUI.LabelField(labelPosition, label);
+                
+            var dropdownPosition = new Rect(position.x + EditorGUIUtility.labelWidth, position.y, position.width - EditorGUIUtility.labelWidth, EditorGUIUtility.singleLineHeight);
+            
+            var newIndex = EditorGUI.Popup(dropdownPosition, index, nameOptions);
             idProperty.ulongValue = allNames[newIndex].ID;
         }
     }

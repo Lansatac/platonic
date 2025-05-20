@@ -47,7 +47,24 @@ namespace Platonic.Core
                     case not null when Name.FieldType == typeof(bool):
                         return _boolValue;
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        return "Cannot be previewed.";
+                }
+            }
+        }
+
+        public bool IsBasicType
+        {
+            get
+            {
+                switch (Name.FieldType)
+                {
+                    case not null when Name.FieldType == typeof(int):
+                    case not null when Name.FieldType == typeof(float):
+                    case not null when Name.FieldType == typeof(string):
+                    case not null when Name.FieldType == typeof(bool):
+                        return true;
+                    default:
+                        return false;
                 }
             }
         }

@@ -19,5 +19,14 @@ namespace Platonic.Editor.Tests
             Assert.That(data2.Fields.Select(f=>f.Name.ID), Is.EquivalentTo(new []{TestInt.ID, TestFloat.ID}));
         }
 
+        [Test]
+        public void MutableDataGetField()
+        {
+            var field = new Field<int>(TestInt, 5);
+            var mutableData = new MutableData(field);
+            var results = mutableData.TryGetField<int>(field.Name.ID, out var retrievedField);
+            Assert.That(results, Is.True);
+            Assert.That(retrievedField, Is.EqualTo(field));
+        }
     }
 }

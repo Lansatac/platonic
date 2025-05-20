@@ -35,7 +35,7 @@ namespace Platonic.Render
                     Field = Data.GetField(fieldName);
                     UpdateField();
                 }
-                else
+                else if(Provider?.IsUsingPreviewData == false)
                 {
                     Debug.LogWarning($"Data did not contain field {fieldName.Name}!", this);
                 }

@@ -16,11 +16,18 @@ namespace Platonic.Render
             get => DataReference.Ref;
             set => DataReference.Ref = value;
         }
-        public readonly VersionedReference<IData?> DataReference;
-        
-        [SerializeField]
-        private List<PreviewField> PreviewFields = null!;
 
+        public readonly VersionedReference<IData?> DataReference;
+
+        [SerializeField] private List<PreviewField>? PreviewFields;
+
+        public IEnumerable<PreviewField>? GetPreviewFields()
+        {
+            return PreviewFields;
+        }
+
+        public bool IsUsingPreviewData => Data == _initialData;
+        
         public DataProvider()
         {
             DataReference = new VersionedReference<IData?>(() => InitialData);
@@ -29,7 +36,12 @@ namespace Platonic.Render
         /// <summary>
         /// Data object that represents the data as serialized on the provider, if any.
         /// </summary>
-        public IData InitialData => new Data(PreviewFields ?? new List<PreviewField>());
+        private IData InitialData => _initialData ??= new Data(
+            PreviewFields?
+                .Where(field => field.IsBasicType).ToList() ?? new List<PreviewField>()
+        );
+
+        private IData? _initialData;
 
         // void ISerializationCallbackReceiver.OnBeforeSerialize()
         // {

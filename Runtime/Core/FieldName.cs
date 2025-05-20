@@ -36,5 +36,10 @@ namespace Platonic.Core
         public string Name => _name;
 
         public Type FieldType => typeof(T);
+
+        public override string ToString()
+        {
+            return _name;
+        }
     }
 }

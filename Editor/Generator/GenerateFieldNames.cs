@@ -6,13 +6,20 @@ using System.IO;
 using System.Text;
 using Platonic.Core;
 using UnityEditor;
+using UnityEditor.Compilation;
 using UnityEngine;
 
 namespace Platonic.Editor.Generator
 {
+    [InitializeOnLoad]
     public static class GenerateFieldNames
     {
-        [InitializeOnLoadMethod]
+        static GenerateFieldNames()
+        {
+            CompilationPipeline.compilationStarted += _ => CheckForGenerationUpdates();
+            CheckForGenerationUpdates();
+        }
+
         private static void CheckForGenerationUpdates()
         {
             var oldHash = EditorPrefs.GetString($"{Application.dataPath}.Platonic.GeneratorHash");
@@ -95,7 +102,7 @@ namespace Platonic.Editor.Generator
                               "#endif\n" +
                               $"\tpublic static class {names.ClassName}\n" +
                               "\t{\n" +
-                              "\t\t[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]\n" +
+                              "\t\t[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]\n" +
                               "\t\tprivate static void Init(){}" +
                               "\n\n");
                 

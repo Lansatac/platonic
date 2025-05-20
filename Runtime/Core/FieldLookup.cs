@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Generic;
 using Platonic.Version;
 
 namespace Platonic.Core
@@ -7,24 +8,27 @@ namespace Platonic.Core
     public class FieldLookup<TSource, TTarget> : IField<TTarget>
     {
         private readonly IField<TSource> _sourceField;
-        private readonly IFieldName<TTarget> _targetName;
-        private readonly Func<TSource, IField<TTarget>> _lookup;
+        private readonly Func<TSource, IField<TTarget>?> _lookup;
+        private readonly TTarget _defaultValue;
 
         private ulong _cachedSourceVersion = Versions.None;
         private ulong _cachedTargetVersion = Versions.None;
 
-        private IField<TTarget> _targetField;
+        private IField<TTarget>? _targetField;
 
-        public FieldLookup(IField<TSource> sourceField, IFieldName<TTarget> targetName, Func<TSource, IField<TTarget>> lookup)
+        public FieldLookup(IField<TSource> sourceField, IFieldName<TTarget> targetName,
+            Func<TSource, IField<TTarget>?> lookup, TTarget defaultValue)
         {
             _sourceField = sourceField;
-            _targetName = targetName;
+            Name = targetName;
             _lookup = lookup;
+            _defaultValue = defaultValue;
 
             _targetField = _lookup(sourceField.Value);
         }
 
         private ulong _version = Versions.Initial;
+
         public ulong Version
         {
             get
@@ -33,17 +37,18 @@ namespace Platonic.Core
                 return _version;
             }
         }
-        
+
         IFieldName IField.Name => Name;
 
-        public TTarget Value {
+        public TTarget Value
+        {
             get
             {
                 Recalculate();
 
-                return _targetField.Value;
+                var newValue = _targetField != null ? _targetField.Value ?? _defaultValue : _defaultValue;
+                return newValue;
             }
-            
         }
 
         private void Recalculate()
@@ -53,16 +58,78 @@ namespace Platonic.Core
                 _cachedSourceVersion = _sourceField.Version;
                 _targetField = _lookup(_sourceField.Value);
                 _cachedTargetVersion = Versions.None;
+                ++_version;
             }
 
-            if (_cachedTargetVersion != _targetField.Version)
+            if (_targetField == null) return;
+            if (_cachedTargetVersion == _targetField?.Version) return;
+            _cachedTargetVersion = _targetField?.Version ?? Versions.None;
+            ++_version;
+        }
+
+        public IFieldName<TTarget> Name { get; }
+
+        object? IField.Value => Value;
+    }
+
+    public class Lookup<TSource, TTarget> : IField<TTarget>
+    {
+        private readonly IField<TSource> _sourceField;
+        private readonly Func<TSource, TTarget?> _lookup;
+        private readonly TTarget _defaultValue;
+
+        private ulong _cachedSourceVersion = Versions.None;
+
+        private TTarget? _cachedValue;
+
+        public Lookup(IField<TSource> sourceField, IFieldName<TTarget> targetName, Func<TSource, TTarget?> lookup,
+            TTarget defaultValue)
+        {
+            _sourceField = sourceField;
+            Name = targetName;
+            _lookup = lookup;
+            _defaultValue = defaultValue;
+
+            _cachedValue = _lookup(sourceField.Value) ?? defaultValue;
+        }
+
+        private ulong _version = Versions.Initial;
+
+        public ulong Version
+        {
+            get
             {
-                _cachedTargetVersion = _targetField.Version;
-                ++_version;
+                Recalculate();
+                return _version;
             }
         }
 
-        public IFieldName<TTarget> Name => _targetName;
+        IFieldName IField.Name => Name;
+
+        public TTarget Value
+        {
+            get
+            {
+                Recalculate();
+                return _cachedValue ?? _defaultValue;
+            }
+        }
+
+        private void Recalculate()
+        {
+            if (_cachedSourceVersion != _sourceField.Version)
+            {
+                _cachedSourceVersion = _sourceField.Version;
+                var newValue = _lookup(_sourceField.Value);
+                if (!EqualityComparer<TTarget?>.Default.Equals(_cachedValue, newValue))
+                {
+                    _cachedValue = newValue ?? _defaultValue;
+                    ++_version;
+                }
+            }
+        }
+
+        public IFieldName<TTarget> Name { get; }
 
         object? IField.Value => Value;
     }

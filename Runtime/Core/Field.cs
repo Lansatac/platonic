@@ -24,7 +24,7 @@ namespace Platonic.Core
             get => _value;
             set
             {
-                if ((_value == null && value != null) || (_value != null && !_value.Equals(value)))
+                if (!Equals(_value, value))
                 {
                     _value = value;
                     Versions.Increment(ref _version);

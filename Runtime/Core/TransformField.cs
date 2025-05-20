@@ -5,26 +5,17 @@ using Platonic.Version;
 
 namespace Platonic.Core
 {
-    public class TransformField<TSource, TTarget> : IField<TTarget>
+    public abstract class BaseTransform<TTarget> : IField<TTarget>
     {
-        private readonly IField<TSource> _sourceField;
-        private readonly Func<TSource, TTarget> _transform;
-        private TTarget _value;
+        private TTarget _value = default!;
         private ulong _cachedVersion = Versions.None;
 
-        public TransformField(IField<TSource> sourceField, IFieldName<TTarget> targetName,
-            Func<TSource, TTarget> transform)
+        protected BaseTransform(IFieldName<TTarget> targetName)
         {
-            _sourceField = sourceField;
-            _transform = transform;
-
-            _value = _transform(_sourceField.Value);
-            _version = Versions.Initial;
-
             Name = targetName;
         }
 
-        private ulong _version;
+        private ulong _version = Versions.Initial;
 
         public ulong Version
         {
@@ -38,10 +29,11 @@ namespace Platonic.Core
 
         private void UpdateVersionAndValue()
         {
-            if (_cachedVersion != _sourceField.Version)
+            ulong currentVersion = CalculateVersion();
+            if (_cachedVersion != currentVersion)
             {
-                _cachedVersion = _sourceField.Version;
-                var newValue = _transform(_sourceField.Value);
+                _cachedVersion = currentVersion;
+                var newValue = CalculateValue();
                 if (!EqualityComparer<TTarget>.Default.Equals(newValue, _value))
                 {
                     _value = newValue;
@@ -49,6 +41,9 @@ namespace Platonic.Core
                 }
             }
         }
+
+        protected abstract ulong CalculateVersion();
+        protected abstract TTarget CalculateValue();
 
         IFieldName IField.Name => Name;
 
@@ -65,152 +60,100 @@ namespace Platonic.Core
         public IFieldName<TTarget> Name { get; }
 
         object? IField.Value => Value;
+
+        public override string ToString()
+        {
+            return $"{Name}: {Value}";
+        }
+    }
+
+    public class TransformField<TSource, TTarget> : BaseTransform<TTarget>
+    {
+        private readonly IField<TSource> _sourceField;
+        private readonly Func<TSource, TTarget> _transform;
+
+        public TransformField(IField<TSource> sourceField, IFieldName<TTarget> targetName,
+            Func<TSource, TTarget> transform) : base(targetName)
+        {
+            _sourceField = sourceField;
+            _transform = transform;
+        }
+
+        protected override ulong CalculateVersion()
+        {
+            return _sourceField.Version;
+        }
+
+        protected override TTarget CalculateValue()
+        {
+            return _transform(_sourceField.Value);
+        }
     }
 
 
-    public class Transform2Fields<TSource1, TSource2, TTarget> : IField<TTarget>
+    public class Transform2Fields<TSource1, TSource2, TTarget> : BaseTransform<TTarget>
     {
         private readonly IField<TSource1> _sourceField1;
         private readonly IField<TSource2> _sourceField2;
         private readonly Func<TSource1, TSource2, TTarget> _transform;
-        private TTarget _value;
-        private ulong _cachedVersion = Versions.None;
 
         public Transform2Fields(IField<TSource1> sourceField1, IField<TSource2> sourceField2,
-            IFieldName<TTarget> targetName, Func<TSource1, TSource2, TTarget> transform)
+            IFieldName<TTarget> targetName, Func<TSource1, TSource2, TTarget> transform) : base(targetName)
         {
             _sourceField1 = sourceField1;
             _sourceField2 = sourceField2;
             _transform = transform;
-
-            _value = _transform(_sourceField1.Value, _sourceField2.Value);
-            _version = Versions.Initial;
-
-            Name = targetName;
         }
 
-        private ulong _version;
-
-        public ulong Version
+        protected override ulong CalculateVersion()
         {
-            get
-            {
-                UpdateVersionAndValue();
-
-                return _version;
-            }
+            return _sourceField1.Version + _sourceField2.Version;
         }
 
-        private void UpdateVersionAndValue()
+        protected override TTarget CalculateValue()
         {
-            if (_cachedVersion != _sourceField1.Version + _sourceField2.Version)
-            {
-                _cachedVersion = _sourceField1.Version + _sourceField2.Version;
-                var newValue = _transform(_sourceField1.Value, _sourceField2.Value);
-                if (!EqualityComparer<TTarget>.Default.Equals(newValue, _value))
-                {
-                    _value = newValue;
-                    _version += 1;
-                }
-            }
+            return _transform(_sourceField1.Value, _sourceField2.Value);
         }
-
-        IFieldName IField.Name => Name;
-
-        public TTarget Value
-        {
-            get
-            {
-                UpdateVersionAndValue();
-
-                return _value;
-            }
-        }
-
-        public IFieldName<TTarget> Name { get; }
-
-        object? IField.Value => Value;
     }
-    
-    
 
-    public class Transform3Fields<TSource1, TSource2, TSource3, TTarget> : IField<TTarget>
+
+    public class Transform3Fields<TSource1, TSource2, TSource3, TTarget> : BaseTransform<TTarget>
     {
         private readonly IField<TSource1> _sourceField1;
         private readonly IField<TSource2> _sourceField2;
         private readonly IField<TSource3> _sourceField3;
         private readonly Func<TSource1, TSource2, TSource3, TTarget> _transform;
-        private TTarget _value;
-        private ulong _cachedVersion = Versions.None;
 
-        public Transform3Fields(IField<TSource1> sourceField1, IField<TSource2> sourceField2, IField<TSource3> sourceField3,
-            IFieldName<TTarget> targetName, Func<TSource1, TSource2, TSource3, TTarget> transform)
+        public Transform3Fields(IField<TSource1> sourceField1, IField<TSource2> sourceField2,
+            IField<TSource3> sourceField3,
+            IFieldName<TTarget> targetName, Func<TSource1, TSource2, TSource3, TTarget> transform) : base(targetName)
         {
             _sourceField1 = sourceField1;
             _sourceField2 = sourceField2;
             _sourceField3 = sourceField3;
             _transform = transform;
-
-            _value = _transform(_sourceField1.Value, _sourceField2.Value, _sourceField3.Value);
-            _version = Versions.Initial;
-
-            Name = targetName;
         }
 
-        private ulong _version;
-
-        public ulong Version
+        protected override ulong CalculateVersion()
         {
-            get
-            {
-                UpdateVersionAndValue();
-
-                return _version;
-            }
+            return _sourceField1.Version + _sourceField2.Version + _sourceField3.Version;
         }
 
-        private void UpdateVersionAndValue()
+        protected override TTarget CalculateValue()
         {
-            if (_cachedVersion != _sourceField1.Version + _sourceField2.Version + _sourceField3.Version)
-            {
-                _cachedVersion = _sourceField1.Version + _sourceField2.Version + _sourceField3.Version;
-                var newValue = _transform(_sourceField1.Value, _sourceField2.Value, _sourceField3.Value);
-                if (!EqualityComparer<TTarget>.Default.Equals(newValue, _value))
-                {
-                    _value = newValue;
-                    _version += 1;
-                }
-            }
+            return _transform(_sourceField1.Value, _sourceField2.Value, _sourceField3.Value);
         }
-
-        IFieldName IField.Name => Name;
-
-        public TTarget Value
-        {
-            get
-            {
-                UpdateVersionAndValue();
-
-                return _value;
-            }
-        }
-
-        public IFieldName<TTarget> Name { get; }
-
-        object? IField.Value => Value;
     }
-    
-    
-    public class Transform4Fields<TSource1, TSource2, TSource3, TSource4, TTarget> : IField<TTarget>
+
+
+    public class Transform4Fields<TSource1, TSource2, TSource3, TSource4, TTarget> : BaseTransform<TTarget>
     {
         private readonly IField<TSource1> _sourceField1;
         private readonly IField<TSource2> _sourceField2;
         private readonly IField<TSource3> _sourceField3;
         private readonly IField<TSource4> _sourceField4;
         private readonly Func<TSource1, TSource2, TSource3, TSource4, TTarget> _transform;
-        private TTarget _value;
-        private ulong _cachedVersion = Versions.None;
-
+    
         public Transform4Fields(
             IField<TSource1> sourceField1,
             IField<TSource2> sourceField2,
@@ -218,78 +161,130 @@ namespace Platonic.Core
             IField<TSource4> sourceField4,
             IFieldName<TTarget> targetName,
             Func<TSource1, TSource2, TSource3, TSource4, TTarget> transform)
+            : base(targetName)
         {
             _sourceField1 = sourceField1;
             _sourceField2 = sourceField2;
             _sourceField3 = sourceField3;
             _sourceField4 = sourceField4;
             _transform = transform;
-
-            _value = _transform(
+        }
+    
+        protected override ulong CalculateVersion()
+        {
+            return _sourceField1.Version +
+                   _sourceField2.Version +
+                   _sourceField3.Version +
+                   _sourceField4.Version;
+        }
+    
+        protected override TTarget CalculateValue()
+        {
+            return _transform(
                 _sourceField1.Value,
                 _sourceField2.Value,
                 _sourceField3.Value,
                 _sourceField4.Value);
-            _version = Versions.Initial;
-
-            Name = targetName;
         }
+    }
 
-        private ulong _version;
 
-        public ulong Version
+    public class Transform5Fields<TSource1, TSource2, TSource3, TSource4, TSource5, TTarget> : BaseTransform<TTarget>
+    {
+        private readonly IField<TSource1> _sourceField1;
+        private readonly IField<TSource2> _sourceField2;
+        private readonly IField<TSource3> _sourceField3;
+        private readonly IField<TSource4> _sourceField4;
+        private readonly IField<TSource5> _sourceField5;
+        private readonly Func<TSource1, TSource2, TSource3, TSource4, TSource5, TTarget> _transform;
+    
+        public Transform5Fields(
+            IField<TSource1> sourceField1,
+            IField<TSource2> sourceField2,
+            IField<TSource3> sourceField3,
+            IField<TSource4> sourceField4,
+            IField<TSource5> sourceField5,
+            IFieldName<TTarget> targetName,
+            Func<TSource1, TSource2, TSource3, TSource4, TSource5, TTarget> transform)
+            : base(targetName)
         {
-            get
-            {
-                UpdateVersionAndValue();
-
-                return _version;
-            }
+            _sourceField1 = sourceField1;
+            _sourceField2 = sourceField2;
+            _sourceField3 = sourceField3;
+            _sourceField4 = sourceField4;
+            _sourceField5 = sourceField5;
+            _transform = transform;
         }
-
-        private void UpdateVersionAndValue()
+    
+        protected override ulong CalculateVersion()
         {
-            if (_cachedVersion != 
-                _sourceField1.Version + 
-                _sourceField2.Version + 
-                _sourceField3.Version + 
-                _sourceField4.Version)
-            {
-                _cachedVersion = 
-                    _sourceField1.Version + 
-                    _sourceField2.Version + 
-                    _sourceField3.Version + 
-                    _sourceField4.Version;
-
-                var newValue = _transform(
-                    _sourceField1.Value,
-                    _sourceField2.Value,
-                    _sourceField3.Value,
-                    _sourceField4.Value);
-                if (!EqualityComparer<TTarget>.Default.Equals(newValue, _value))
-                {
-                    _value = newValue;
-                    _version += 1;
-                }
-            }
+            return _sourceField1.Version +
+                   _sourceField2.Version +
+                   _sourceField3.Version +
+                   _sourceField4.Version +
+                   _sourceField5.Version;
         }
-
-        IFieldName IField.Name => Name;
-
-        public TTarget Value
+    
+        protected override TTarget CalculateValue()
         {
-            get
-            {
-                UpdateVersionAndValue();
-
-                return _value;
-            }
+            return _transform(
+                _sourceField1.Value,
+                _sourceField2.Value,
+                _sourceField3.Value,
+                _sourceField4.Value,
+                _sourceField5.Value);
         }
-
-        public IFieldName<TTarget> Name { get; }
-
-        object? IField.Value => Value;
     }
     
+    public class Transform6Fields<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TTarget> : BaseTransform<TTarget>
+    {
+        private readonly IField<TSource1> _sourceField1;
+        private readonly IField<TSource2> _sourceField2;
+        private readonly IField<TSource3> _sourceField3;
+        private readonly IField<TSource4> _sourceField4;
+        private readonly IField<TSource5> _sourceField5;
+        private readonly IField<TSource6> _sourceField6;
+        private readonly Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TTarget> _transform;
     
+        public Transform6Fields(
+            IField<TSource1> sourceField1,
+            IField<TSource2> sourceField2,
+            IField<TSource3> sourceField3,
+            IField<TSource4> sourceField4,
+            IField<TSource5> sourceField5,
+            IField<TSource6> sourceField6,
+            IFieldName<TTarget> targetName,
+            Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TTarget> transform)
+            : base(targetName)
+        {
+            _sourceField1 = sourceField1;
+            _sourceField2 = sourceField2;
+            _sourceField3 = sourceField3;
+            _sourceField4 = sourceField4;
+            _sourceField5 = sourceField5;
+            _sourceField6 = sourceField6;
+            _transform = transform;
+        }
+    
+        protected override ulong CalculateVersion()
+        {
+            return _sourceField1.Version +
+                   _sourceField2.Version +
+                   _sourceField3.Version +
+                   _sourceField4.Version +
+                   _sourceField5.Version +
+                   _sourceField6.Version;
+        }
+    
+        protected override TTarget CalculateValue()
+        {
+            return _transform(
+                _sourceField1.Value,
+                _sourceField2.Value,
+                _sourceField3.Value,
+                _sourceField4.Value,
+                _sourceField5.Value,
+                _sourceField6.Value);
+        }
+    }
 }
