@@ -12,6 +12,7 @@ namespace Platonic.Render
         private ulong _cachedFieldVersion = Versions.None;
         protected IField<T>? Field { get; private set; }
         [SerializeField] private SerializableFieldName<T> FieldName = new();
+        
 
         protected sealed override void OnDataChanged()
         {

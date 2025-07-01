@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Platonic.Core;
 using UnityEngine;
@@ -65,16 +66,16 @@ namespace Platonic
             var field = GetField((IFieldName)fieldName);
             return (Field<T>)field;
         }
-        
-        public bool TryGetField<T>(ulong fieldNameId, out Field<T>? field)
+
+        public bool TryGetField<T>(ulong fieldNameId, [NotNullWhen(true)] out Field<T>? field)
         {
             if (!_fields.TryGetValue(fieldNameId, out var iField))
             {
                 field = null;
                 return false;
             }
-            
-            field = (Field<T>)iField;
+
+            field = iField as Field<T>;
             return field != null;
         }
 

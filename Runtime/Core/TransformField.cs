@@ -75,7 +75,7 @@ namespace Platonic.Core
         public TransformField(IField<TSource> sourceField, IFieldName<TTarget> targetName,
             Func<TSource, TTarget> transform) : base(targetName)
         {
-            _sourceField = sourceField;
+            _sourceField = sourceField ?? throw new ArgumentNullException(nameof(sourceField));
             _transform = transform;
         }
 
@@ -100,8 +100,8 @@ namespace Platonic.Core
         public Transform2Fields(IField<TSource1> sourceField1, IField<TSource2> sourceField2,
             IFieldName<TTarget> targetName, Func<TSource1, TSource2, TTarget> transform) : base(targetName)
         {
-            _sourceField1 = sourceField1;
-            _sourceField2 = sourceField2;
+            _sourceField1 = sourceField1 ?? throw new ArgumentNullException(nameof(sourceField1));
+            _sourceField2 = sourceField2 ?? throw new ArgumentNullException(nameof(sourceField2));
             _transform = transform;
         }
 

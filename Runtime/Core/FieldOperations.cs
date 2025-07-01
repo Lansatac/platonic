@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using Platonic.Version;
 
 namespace Platonic.Core
 {
@@ -9,46 +10,48 @@ namespace Platonic.Core
         {
             return source.GetField(sourceName);
         }
-        public static TransformField<TSource, TSource> BorrowedFrom<TSource>(this IFieldName<TSource> sourceName, IData source, Func<TSource, TSource> transform)
+
+        public static IField<TSource> BorrowedFrom<TSource>(this IFieldName<TSource> sourceName, IData source,
+            Func<TSource, TSource> transform)
         {
             var sourceField = source.GetField(sourceName);
             return new TransformField<TSource, TSource>(sourceField, sourceName, transform);
         }
 
-        public static TransformField<TSource, TTarget> BorrowedAs<TSource, TTarget>(this IFieldName<TTarget> targetName,
+        public static IField<TTarget> BorrowedAs<TSource, TTarget>(this IFieldName<TTarget> targetName,
             IData source, IFieldName<TSource> sourceName, Func<TSource, TTarget> transform)
         {
             var sourceField = source.GetField(sourceName);
             return new TransformField<TSource, TTarget>(sourceField, targetName, transform);
         }
 
-        public static TransformField<TSource, TSource> BorrowedAs<TSource>(this IFieldName<TSource> targetName,
+        public static IField<TSource> BorrowedAs<TSource>(this IFieldName<TSource> targetName,
             IData source, IFieldName<TSource> sourceName)
         {
             var sourceField = source.GetField(sourceName);
             return new TransformField<TSource, TSource>(sourceField, targetName, val => val);
         }
 
-        public static TransformField<TSource, TSource> RenameAs<TSource>(this IField<TSource> sourceField,
+        public static IField<TSource> RenameAs<TSource>(this IField<TSource> sourceField,
             IFieldName<TSource> targetName)
         {
             return new TransformField<TSource, TSource>(sourceField, targetName, source => source);
         }
-        
-        public static TransformField<TSource, TTarget> From<TSource, TTarget>(this IFieldName<TTarget> targetName,
+
+        public static IField<TTarget> From<TSource, TTarget>(this IFieldName<TTarget> targetName,
             IField<TSource> sourceField, Func<TSource, TTarget> transform)
         {
             return new TransformField<TSource, TTarget>(sourceField, targetName, transform);
         }
 
-        public static Transform2Fields<TSource1, TSource2, TTarget> From<TSource1, TSource2, TTarget>(
+        public static IField<TTarget> From<TSource1, TSource2, TTarget>(
             this IFieldName<TTarget> targetName, IField<TSource1> sourceField1, IField<TSource2> sourceField2,
             Func<TSource1, TSource2, TTarget> transform)
         {
             return new Transform2Fields<TSource1, TSource2, TTarget>(sourceField1, sourceField2, targetName, transform);
         }
 
-        public static Transform3Fields<TSource1, TSource2, TSource3, TTarget> From<TSource1, TSource2, TSource3,
+        public static IField<TTarget> From<TSource1, TSource2, TSource3,
             TTarget>(
             this IFieldName<TTarget> targetName,
             IField<TSource1> sourceField1,
@@ -60,7 +63,7 @@ namespace Platonic.Core
                 targetName, transform);
         }
 
-        public static Transform4Fields<TSource1, TSource2, TSource3, TSource4, TTarget> From<TSource1, TSource2,
+        public static IField<TTarget> From<TSource1, TSource2,
             TSource3,
             TSource4, TTarget>(
             this IFieldName<TTarget> targetName,
@@ -74,8 +77,8 @@ namespace Platonic.Core
                 sourceField3,
                 sourceField4, targetName, transform);
         }
-        
-        public static Transform5Fields<TSource1, TSource2, TSource3, TSource4, TSource5, TTarget> From<TSource1, TSource2, 
+
+        public static IField<TTarget> From<TSource1, TSource2,
             TSource3, TSource4, TSource5, TTarget>(
             this IFieldName<TTarget> targetName,
             IField<TSource1> sourceField1,
@@ -88,8 +91,8 @@ namespace Platonic.Core
             return new Transform5Fields<TSource1, TSource2, TSource3, TSource4, TSource5, TTarget>(
                 sourceField1, sourceField2, sourceField3, sourceField4, sourceField5, targetName, transform);
         }
-        
-        public static Transform6Fields<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TTarget> From<TSource1, TSource2, 
+
+        public static IField<TTarget> From<TSource1, TSource2,
             TSource3, TSource4, TSource5, TSource6, TTarget>(
             this IFieldName<TTarget> targetName,
             IField<TSource1> sourceField1,
@@ -101,7 +104,17 @@ namespace Platonic.Core
             Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TTarget> transform)
         {
             return new Transform6Fields<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TTarget>(
-                sourceField1, sourceField2, sourceField3, sourceField4, sourceField5, sourceField6, targetName, transform);
+                sourceField1, sourceField2, sourceField3, sourceField4, sourceField5, sourceField6, targetName,
+                transform);
+        }
+
+        public static IField<TTarget> FromVersioned<TSource, TTarget>(
+            this IFieldName<TTarget> targetName,
+            TSource source, Func<TSource,
+                TTarget> transform)
+            where TSource : IVersioned
+        {
+            return new TransformVersioned<TSource, TTarget>(source, targetName, transform);
         }
     }
 }
