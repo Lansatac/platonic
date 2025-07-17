@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Generic;
 using Platonic.Version;
 
 namespace Platonic.Core
@@ -108,6 +109,11 @@ namespace Platonic.Core
                 transform);
         }
 
+        public static IField<TTarget> FromN<TSource, TTarget>(this IFieldName<TTarget> targetName,  IEnumerable<IField<TSource>> sourceFields, Func<IEnumerable<TSource>, TTarget> transform)
+        {
+            return new TransformNFields<TSource, TTarget>(sourceFields, targetName, transform);
+        }
+        
         public static IField<TTarget> FromVersioned<TSource, TTarget>(
             this IFieldName<TTarget> targetName,
             TSource source, Func<TSource,

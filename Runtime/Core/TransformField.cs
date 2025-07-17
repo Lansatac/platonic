@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Platonic.Version;
 
 namespace Platonic.Core
@@ -285,6 +286,34 @@ namespace Platonic.Core
                 _sourceField4.Value,
                 _sourceField5.Value,
                 _sourceField6.Value);
+        }
+    }
+    
+    public class TransformNFields<TSource, TTarget> : BaseTransform<TTarget>
+    {
+        private readonly IField<TSource>[] _sourceFields;
+        private readonly Func<IEnumerable<TSource>, TTarget> _transform;
+
+        public TransformNFields(
+            IEnumerable<IField<TSource>> sourceFields,
+            IFieldName<TTarget> targetName,
+            Func<IEnumerable<TSource>, TTarget> transform)
+            : base(targetName)
+        {
+            _sourceFields = sourceFields.ToArray();
+            _transform = transform;
+        }
+
+        protected override ulong CalculateVersion()
+        {
+            ulong result = 0;
+            foreach (var field in _sourceFields) result += field.Version;
+            return result;
+        }
+
+        protected override TTarget CalculateValue()
+        {
+            return _transform(_sourceFields.Select(f => f.Value));
         }
     }
 }

@@ -33,10 +33,17 @@ namespace Platonic.Render
                 return;
             }
 
-            if (Data != null)
+            try
             {
-                Field1 = Data.GetField(fieldName1);
-                Field2 = Data.GetField(fieldName2);
+                if (Data != null)
+                {
+                    Field1 = Data.GetField(fieldName1);
+                    Field2 = Data.GetField(fieldName2);
+                }
+            }
+            catch (Exception)
+            {
+                if (Provider?.IsUsingPreviewData == false) throw; 
             }
         }
 
