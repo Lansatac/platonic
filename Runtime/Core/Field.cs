@@ -65,7 +65,7 @@ namespace Platonic.Core
 
         public override string ToString()
         {
-            return _value?.ToString() ?? string.Empty;
+            return $"{Name.Name}: {_value}";
         }
     }
 }

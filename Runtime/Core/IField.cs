@@ -10,7 +10,7 @@ namespace Platonic
         object? Value { get; }
     }
 
-    public interface IField<out T> : IField
+    public interface IField<out T> : IField, IVersionedValue<T>
     {
         new IFieldName<T> Name { get; }
         new T Value { get; }

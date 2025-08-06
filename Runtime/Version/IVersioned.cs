@@ -12,6 +12,11 @@ namespace Platonic.Version
     {
         ulong Version { get; }
     }
+    
+    public interface IVersionedValue<out T> : IVersioned
+    {
+        T Value { get; }
+    }
 
     public static class Versions
     {

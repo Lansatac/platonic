@@ -2,15 +2,25 @@
 using Platonic.Core;
 using Platonic.Version;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Platonic.Render
 {
     public abstract class ProviderRenderer : MonoBehaviour
     {
+        protected readonly string TypeName;
+        private readonly string _providerSample;
+        
         private DataProvider? _provider;
         protected DataProvider? Provider => _provider;
         
         private ulong _cachedProviderVersion = Versions.None;
+
+        protected ProviderRenderer()
+        {
+            TypeName = GetType().Name;
+            _providerSample = $"{TypeName} OnDataChanged";
+        }
 
         protected void Awake()
         {
@@ -47,7 +57,9 @@ namespace Platonic.Render
             if (_cachedProviderVersion != _provider.DataReference.Version)
             {
                 _cachedProviderVersion = _provider.DataReference.Version;
+                Profiler.BeginSample(_providerSample, this);
                 OnDataChanged();
+                Profiler.EndSample();
             }
         }
 

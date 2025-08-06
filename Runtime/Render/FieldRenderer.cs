@@ -4,15 +4,23 @@ using Platonic.Core;
 using Platonic.Scriptable;
 using Platonic.Version;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Platonic.Render
 {
     public abstract class FieldRenderer<T> : ProviderRenderer
     {
+        private readonly string _fieldSample;
+        
         private ulong _cachedFieldVersion = Versions.None;
         protected IField<T>? Field { get; private set; }
         [SerializeField] private SerializableFieldName<T> FieldName = new();
-        
+
+        protected FieldRenderer()
+        {
+            _fieldSample = $"{TypeName} UpdateField";
+        }
+
 
         protected sealed override void OnDataChanged()
         {
@@ -57,7 +65,9 @@ namespace Platonic.Render
             if (_cachedFieldVersion != Field.Version)
             {
                 _cachedFieldVersion = Field.Version;
+                Profiler.BeginSample(_fieldSample, this);
                 FieldChanged(Field.Value);
+                Profiler.EndSample();
             }
         }
 

@@ -80,6 +80,12 @@ namespace Platonic.Core
 
         string IField<string>.Value => _stringValue;
         IFieldName<string> IField<string>.Name => (IFieldName<string>)Name;
+        
+        int IVersionedValue<int>.Value => _intValue;
+        float IVersionedValue<float>.Value => _floatValue;
+        bool IVersionedValue<bool>.Value => _boolValue;
+        string IVersionedValue<string>.Value => _stringValue;
+        
         public void OnBeforeSerialize()
         {
             
