@@ -1,3 +1,5 @@
+using System;
+using Platonic.Core;
 using Platonic.Render;
 using UnityEngine;
 
@@ -7,6 +9,7 @@ namespace Platonic
     {
         [SerializeField] private GameObject Target;
         [SerializeField] private bool Invert;
+
         protected override void FieldChanged(bool newValue)
         {
             if (Invert)

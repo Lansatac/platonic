@@ -68,12 +68,26 @@ namespace Platonic.Version
         {
             return new Transform6Versioned<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TTarget>(source1, source2, source3, source4, source5, source6, transform);
         }
-
+        
+        
+        public static IVersionedValue<TTarget> FromN<TSource, TTarget>(IEnumerable<IVersionedValue<TSource>> sourceFields,
+            Func<IEnumerable<TSource>, TTarget> transform)
+        {
+            return new TransformNVersioned<TSource, TTarget>(sourceFields.AsVersioned(), transform);
+        }
+        
         public static IVersionedValue<TTarget> FromN<TSource, TTarget>(
             IVersionedValue<IEnumerable<IVersionedValue<TSource>>> sources, 
             Func<IEnumerable<TSource>, TTarget> transform)
         {
             return new TransformNVersioned<TSource, TTarget>(sources, transform);
+        }
+        
+        public static IVersionedValue<TTarget> Lookup<TSource, TTarget>(IVersionedValue<TSource> sourceField,
+            Func<TSource, IVersionedValue<TTarget>?> lookup,
+            TTarget defaultValue)
+        {
+            return new VersionedLookup<TSource, TTarget>(sourceField, lookup, defaultValue);
         }
     }
 }

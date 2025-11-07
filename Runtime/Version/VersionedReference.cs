@@ -3,23 +3,18 @@ using System;
 
 namespace Platonic.Version
 {
-    public class VersionedReference<T> : IVersioned
+    public class VersionedReference<T> : IVersionedValue<T>
         where T : class?
     {
-        private readonly Func<T>? _defaultValue;
+        private readonly Func<T> _defaultValue;
         private T? _ref;
         private ulong _version = Versions.Initial;
         
-        public T? Ref
+        public T Ref
         {
             get
             {
-                if (_ref == null && _defaultValue != null)
-                {
-                    _ref = _defaultValue();
-                }
-                    
-                return _ref;
+                return _ref ??= _defaultValue();
             }
             set
             {
@@ -31,17 +26,12 @@ namespace Platonic.Version
             }
         }
         
-        
-
-        public VersionedReference()
-        {
-        }
-        
         public VersionedReference(Func<T> defaultValue)
         {
-            this._defaultValue = defaultValue;
+            _defaultValue = defaultValue;
         }
 
         public ulong Version => _version;
-        }
+        public T Value => Ref;
+    }
     }

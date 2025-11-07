@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.Linq;
 using Platonic.Core;
 using Platonic.Scriptable;
 using Platonic.Version;
@@ -11,7 +12,7 @@ namespace Platonic.Render
     public abstract class FieldRenderer<T> : ProviderRenderer
     {
         private readonly string _fieldSample;
-        
+
         private ulong _cachedFieldVersion = Versions.None;
         protected IField<T>? Field { get; private set; }
         [SerializeField] private SerializableFieldName<T> FieldName = new();
@@ -20,7 +21,6 @@ namespace Platonic.Render
         {
             _fieldSample = $"{TypeName} UpdateField";
         }
-
 
         protected sealed override void OnDataChanged()
         {
@@ -44,9 +44,13 @@ namespace Platonic.Render
                     Field = Data.GetField(fieldName);
                     UpdateField();
                 }
-                else if(Provider?.IsUsingPreviewData == false)
+                else if (Provider?.IsUsingPreviewData == false)
                 {
-                    Debug.LogWarning($"Data did not contain field {fieldName.Name}!", this);
+                    Debug.LogWarning(
+                        $"Data did not contain field {fieldName.Name}!" +
+                        " Game Object: " +
+                        $"{string.Join("/", transform.GetComponentsInParent<Transform>(true).Select(t => t.name).Reverse())}",
+                        this);
                 }
             }
         }
@@ -54,14 +58,14 @@ namespace Platonic.Render
         protected sealed override void ProviderLateUpdate()
         {
             UpdateField();
-            
+
             FieldLateUpdate();
         }
 
         protected void UpdateField()
         {
             if (Field == null) return;
-            
+
             if (_cachedFieldVersion != Field.Version)
             {
                 _cachedFieldVersion = Field.Version;
@@ -71,8 +75,18 @@ namespace Platonic.Render
             }
         }
 
-        protected virtual void FieldLateUpdate() { }
+        protected virtual void FieldLateUpdate()
+        {
+        }
 
         protected abstract void FieldChanged(T newValue);
+
+        //TODO: come back to this, maybe?
+        // protected static T2 AddRenderer<T2>(GameObject gameObject, FieldName<T> fieldName) where T2 : FieldRenderer<T> 
+        // {
+        //     var component = gameObject.AddComponent<T2>();
+        //     component.FieldName.ID = fieldName.ID;
+        //     return component;
+        // }
     }
 }
