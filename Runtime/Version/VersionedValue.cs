@@ -21,5 +21,7 @@
                 Version += 1;
             }
         }
+        
+        public void ForceVersionIncrement() => Version += 1;
     }
 }

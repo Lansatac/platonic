@@ -6,7 +6,7 @@ namespace Platonic.Core
 {
     public interface IFieldName
     {
-        ulong ID { get; }
+        ulong Id { get; }
         string Name { get; }
         Type FieldType { get; }
     }
@@ -31,7 +31,7 @@ namespace Platonic.Core
             _name = name;
         }
 
-        public ulong ID => _id;
+        public ulong Id => _id;
 
         public string Name => _name;
 

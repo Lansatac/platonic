@@ -26,7 +26,7 @@ namespace Platonic.Editor.Scriptable
              }
              else
              {
-                 idProperty.ulongValue = allNames[index].ID;
+                 idProperty.ulongValue = allNames[index].Id;
                  property.serializedObject.ApplyModifiedProperties();
              }
 
@@ -34,7 +34,7 @@ namespace Platonic.Editor.Scriptable
              nameDropdownField.RegisterValueChangedCallback(change =>
              {
                  var nameIndex = nameOptions.IndexOf(change.newValue);
-                 idProperty.ulongValue = allNames[nameIndex].ID;
+                 idProperty.ulongValue = allNames[nameIndex].Id;
                  property.serializedObject.ApplyModifiedProperties();
              });
 
@@ -59,11 +59,11 @@ namespace Platonic.Editor.Scriptable
              }
              else
              {
-                 idProperty.ulongValue = allNames[index].ID;
+                 idProperty.ulongValue = allNames[index].Id;
                  property.serializedObject.ApplyModifiedProperties();
              }
              var newIndex = EditorGUILayout.Popup("Name", index, nameOptions);
-             idProperty.ulongValue = allNames[newIndex].ID;
+             idProperty.ulongValue = allNames[newIndex].Id;
          }
      }
     

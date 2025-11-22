@@ -80,7 +80,7 @@ namespace Platonic.Core
 
             if (name is not IFieldName<T> typedName)
             {
-                throw new Exception($"Field name {name.ID}:{name.Name} was registered as {name.FieldType.Name} but requested as {typeof(T).Name}!");
+                throw new Exception($"Field name {name.Id}:{name.Name} was registered as {name.FieldType.Name} but requested as {typeof(T).Name}!");
             }
             return typedName;
         }
@@ -94,7 +94,7 @@ namespace Platonic.Core
 
             if (name is not FieldName<T> typedName)
             {
-                throw new Exception($"Field name {name.ID}:{name.Name} was registered as {name.FieldType.Name} but requested as {typeof(T).Name}!");
+                throw new Exception($"Field name {name.Id}:{name.Name} was registered as {name.FieldType.Name} but requested as {typeof(T).Name}!");
             }
             
             return typedName;

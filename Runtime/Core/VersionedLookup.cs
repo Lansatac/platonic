@@ -5,26 +5,25 @@ using Platonic.Version;
 
 namespace Platonic.Core
 {
-    public class VersionedLookup<TSource, TTarget> : IVersionedValue<TTarget>
+    public class VersionedLookup<TSource, TVersionedTarget, TFinalTarget> : IVersionedValue<TFinalTarget>
     {
         private readonly IVersionedValue<TSource> _source;
-        private readonly Func<TSource, IVersionedValue<TTarget>?> _lookup;
-        private readonly TTarget _defaultValue;
+        private readonly Func<TSource, IVersionedValue<TVersionedTarget>?> _lookup;
+        private readonly Func<TVersionedTarget?, TFinalTarget> _transform;
 
         private ulong _cachedSourceVersion = Versions.None;
         private ulong _cachedTargetVersion = Versions.None;
 
-        private IVersionedValue<TTarget>? _target;
+        private IVersionedValue<TVersionedTarget>? _target;
+        private TFinalTarget? _cachedValue;
 
         public VersionedLookup(IVersionedValue<TSource> source,
-            Func<TSource, IVersionedValue<TTarget>?> lookup,
-            TTarget defaultValue)
+            Func<TSource, IVersionedValue<TVersionedTarget>?> lookup,
+            Func<TVersionedTarget?, TFinalTarget> transform)
         {
             _source = source;
             _lookup = lookup;
-            _defaultValue = defaultValue;
-
-            _target = _lookup(source.Value);
+            _transform = transform;
         }
 
         private ulong _version = Versions.Initial;
@@ -38,18 +37,9 @@ namespace Platonic.Core
             }
         }
 
-        public TTarget Value
-        {
-            get
-            {
-                Recalculate();
+        public TFinalTarget Value => Recalculate();
 
-                var newValue = _target != null ? _target.Value ?? _defaultValue : _defaultValue;
-                return newValue;
-            }
-        }
-
-        private void Recalculate()
+        private TFinalTarget Recalculate()
         {
             if (_cachedSourceVersion != _source.Version)
             {
@@ -59,34 +49,34 @@ namespace Platonic.Core
                 ++_version;
             }
 
-            if (_target == null) return;
-            if (_cachedTargetVersion == _target?.Version) return;
+            if (_cachedTargetVersion == _target?.Version) return _cachedValue!;
             _cachedTargetVersion = _target?.Version ?? Versions.None;
+            _cachedValue = _transform(_target != null ? _target.Value : default);
             ++_version;
+            return _cachedValue;
         }
     }
     
-    public class VersionedLookup2<TSource1, TSource2, TTarget> : IVersionedValue<TTarget>
+    public class VersionedLookup2<TSource1, TSource2, TVersionedTarget, TFinalTarget> : IVersionedValue<TFinalTarget>
     {
         private readonly IVersionedValue<TSource1> _source1;
         private readonly IVersionedValue<TSource2> _source2;
-        private readonly Func<TSource1, TSource2, IVersionedValue<TTarget>?> _lookup;
-        private readonly TTarget _defaultValue;
+        private readonly Func<TSource1, TSource2, IVersionedValue<TVersionedTarget>?> _lookup;
+        private readonly Func<TVersionedTarget?, TFinalTarget> _transform;
 
         private ulong _cachedSourceVersion = Versions.None;
         private ulong _cachedTargetVersion = Versions.None;
 
-        private IVersionedValue<TTarget>? _target;
+        private IVersionedValue<TVersionedTarget>? _target;
+        private TFinalTarget? _cachedValue;
 
         public VersionedLookup2(IVersionedValue<TSource1> source1, IVersionedValue<TSource2> source2,
-            Func<TSource1, TSource2, IVersionedValue<TTarget>?> lookup, TTarget defaultValue)
+            Func<TSource1, TSource2, IVersionedValue<TVersionedTarget>?> lookup, Func<TVersionedTarget?, TFinalTarget> transform)
         {
             _source1 = source1;
             _source2 = source2;
             _lookup = lookup;
-            _defaultValue = defaultValue;
-
-            _target = _lookup(source1.Value, source2.Value);;
+            _transform = transform;
         }
 
         private ulong _version = Versions.Initial;
@@ -100,18 +90,9 @@ namespace Platonic.Core
             }
         }
 
-        public TTarget Value
-        {
-            get
-            {
-                Recalculate();
+        public TFinalTarget Value => Recalculate();
 
-                var newValue = _target != null ? _target.Value ?? _defaultValue : _defaultValue;
-                return newValue;
-            }
-        }
-
-        private void Recalculate()
+        private TFinalTarget Recalculate()
         {
             if (_cachedSourceVersion != _source1.Version + _source2.Version)
             {
@@ -121,10 +102,12 @@ namespace Platonic.Core
                 ++_version;
             }
 
-            if (_target == null) return;
-            if (_cachedTargetVersion == _target?.Version) return;
+            if (_cachedTargetVersion == _target?.Version) return _cachedValue!;
             _cachedTargetVersion = _target?.Version ?? Versions.None;
+            _cachedValue = _transform(_target != null ? _target.Value : default);
             ++_version;
+            
+            return _cachedValue;
         }
     }
 

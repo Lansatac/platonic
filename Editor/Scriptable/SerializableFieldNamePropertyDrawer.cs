@@ -76,7 +76,7 @@ namespace Platonic.Editor.Scriptable
                     int capturedIndex = i; // Capture index for the lambda
                     var button = new Button(() =>
                     {
-                        _idProperty.ulongValue = _allNames[capturedIndex].ID;
+                        _idProperty.ulongValue = _allNames[capturedIndex].Id;
                         _serializedObject.ApplyModifiedProperties();
                         _nameFieldToUpdate.value = _displayOptions[capturedIndex];
 
@@ -123,7 +123,7 @@ namespace Platonic.Editor.Scriptable
             {
                 if (allNames.Any()) // Ensure allNames is not empty
                 {
-                    idProperty.ulongValue = allNames[index].ID; // index is 0
+                    idProperty.ulongValue = allNames[index].Id; // index is 0
                     property.serializedObject.ApplyModifiedProperties();
                 }
             }
@@ -188,7 +188,7 @@ namespace Platonic.Editor.Scriptable
             {
                 if (allNames.Any()) // Ensure allNames is not empty
                 {
-                    idProperty.ulongValue = allNames[index].ID; // index is 0
+                    idProperty.ulongValue = allNames[index].Id; // index is 0
                     property.serializedObject.ApplyModifiedProperties();
                 }
             }

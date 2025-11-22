@@ -23,7 +23,7 @@ namespace Platonic
             {
                 try
                 {
-                    _fields.Add(field.Name.ID, field);
+                    _fields.Add(field.Name.Id, field);
 
                 }
                 catch (ArgumentException)
@@ -42,14 +42,14 @@ namespace Platonic
         public IEnumerable<IField> Fields => _fields.Values;
         public bool HasField(IFieldName fieldName)
         {
-            return _fields.ContainsKey(fieldName.ID);
+            return _fields.ContainsKey(fieldName.Id);
         }
 
         public IField GetField(IFieldName fieldName)
         {
-            if (!_fields.TryGetValue(fieldName.ID, out var field))
+            if (!_fields.TryGetValue(fieldName.Id, out var field))
             {
-                throw new Exception($"Data did not contain field with name {fieldName.ID}:{fieldName.Name}!");
+                throw new Exception($"Data did not contain field with name {fieldName.Id}:{fieldName.Name}!");
             }
 
             return field;

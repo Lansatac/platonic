@@ -36,6 +36,12 @@ namespace Platonic.Render
             ProviderOnEnable();
         }
 
+        private void OnTransformParentChanged()
+        {
+            _provider = LocateProvider();
+            UpdateProvider();
+        }
+        
         protected virtual DataProvider LocateProvider()
         {
             return GetComponentInParent<DataProvider>();
