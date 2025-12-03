@@ -18,6 +18,16 @@ namespace Platonic.Collections
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        public VersionedList()
+        {
+        }
+
+        public VersionedList(IEnumerable<T> collection)
+        {
+            _internalList.AddRange(collection);
+        }
+        
+
         public void Add(T item)
         {
             _internalList.Add(item);

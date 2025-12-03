@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Platonic.Collections;
 using Platonic.Version;
 
 namespace Platonic.Core
@@ -259,13 +260,13 @@ namespace Platonic.Core
     
     public class TransformNVersioned<TSource, TTarget> : BaseTransformVersioned<TTarget>
     {
-        private readonly IVersionedValue<IEnumerable<IVersionedValue<TSource>>> _sources;
+        private readonly IVersionedEnumerable<IVersionedValue<TSource>> _sources;
         private IVersionedValue<TSource>[]? _cachedSources;
         private ulong _cachedSourcesVersion = Versions.None;
         private readonly Func<IEnumerable<TSource>, TTarget> _transform;
 
         public TransformNVersioned(
-            IVersionedValue<IEnumerable<IVersionedValue<TSource>>> sources,
+            IVersionedEnumerable<IVersionedValue<TSource>> sources,
             Func<IEnumerable<TSource>, TTarget> transform)
         {
             _sources = sources;

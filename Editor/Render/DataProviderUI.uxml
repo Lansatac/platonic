@@ -2,6 +2,11 @@
     <uie:PropertyField name="Data" binding-path="ScriptableData" label="Data" />
     <uie:PropertyField name="PreviewFields" binding-path="PreviewFields" />
     <uie:PropertyField binding-path="Fields" name="Fields" label="Fields" />
+    <ui:VisualElement style="flex-direction: row; align-items: center;">
+        <ui:Label tabindex="-1" text="Requested Fields by Renderers:" display-tooltip-when-elided="true" style="flex-grow: 1;" />
+        <ui:Button text="📋" name="CopyFieldNamesButton" />
+    </ui:VisualElement>
+    <ui:ListView focusable="true" name="RequestedFieldsPreview" header-title="Requested Fields by Renderers:" virtualization-method="FixedHeight" fixed-item-height="15" show-border="true" />
     <ui:Label tabindex="-1" text="Data Contents:" display-tooltip-when-elided="true" />
     <ui:ListView focusable="true" name="DataFieldsPreview" header-title="Data Contents:" virtualization-method="FixedHeight" fixed-item-height="15" show-border="true" />
 </ui:UXML>

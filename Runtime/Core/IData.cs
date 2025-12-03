@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Platonic.Core;
 
 namespace Platonic
@@ -13,6 +14,8 @@ namespace Platonic
         
         IField GetField(IFieldName fieldName);
         IField<T> GetField<T>(IFieldName<T> fieldName);
+        
+        bool TryGetField<T>(IFieldName<T> fieldName, [NotNullWhen(true)] out IField<T>? field);
 
         IEnumerator<IField> IEnumerable<IField>.GetEnumerator()
         {

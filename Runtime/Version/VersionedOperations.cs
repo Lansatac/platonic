@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using Platonic.Collections;
 using Platonic.Core;
 
 namespace Platonic.Version
@@ -73,11 +74,11 @@ namespace Platonic.Version
         public static IVersionedValue<TTarget> FromN<TSource, TTarget>(IEnumerable<IVersionedValue<TSource>> sourceFields,
             Func<IEnumerable<TSource>, TTarget> transform)
         {
-            return new TransformNVersioned<TSource, TTarget>(sourceFields.AsVersioned(), transform);
+            return new TransformNVersioned<TSource, TTarget>(new VersionedList<IVersionedValue<TSource>>(sourceFields), transform);
         }
         
         public static IVersionedValue<TTarget> FromN<TSource, TTarget>(
-            IVersionedValue<IEnumerable<IVersionedValue<TSource>>> sources, 
+            IVersionedEnumerable<IVersionedValue<TSource>> sources, 
             Func<IEnumerable<TSource>, TTarget> transform)
         {
             return new TransformNVersioned<TSource, TTarget>(sources, transform);

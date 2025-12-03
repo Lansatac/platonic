@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Platonic.Core;
 
 namespace Platonic.Serializable
@@ -35,6 +36,11 @@ namespace Platonic.Serializable
         public IField<T> GetField<T>(IFieldName<T> fieldName)
         {
             return Data.GetField(fieldName);
+        }
+
+        public bool TryGetField<T>(IFieldName<T> fieldName, [NotNullWhen(true)] out IField<T>? field)
+        {
+            return Data.TryGetField(fieldName, out field);
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using Platonic.Collections;
+using Platonic.Linq;
 using Platonic.Version;
 using UnityEngine;
 
@@ -40,6 +42,11 @@ namespace Platonic.Core
             return new VersionedField<TSource>(targetName, sourceField);
         }
 
+        public static IField<T> From<T>(this IFieldName<T> targetName, IVersionedValue<T> sourceField)
+        {
+            return new VersionedField<T>(targetName, sourceField);
+        }
+        
         public static IField<TTarget> From<TSource, TTarget>(this IFieldName<TTarget> targetName,
             IVersionedValue<TSource> sourceField, Func<TSource, TTarget> transform)
         {
@@ -104,16 +111,15 @@ namespace Platonic.Core
         {
             return new VersionedField<TTarget>(targetName, Versioned.From(sourceField1, sourceField2, sourceField3, sourceField4, sourceField5, sourceField6, transform));
         }
-
+        
         public static IField<TTarget> FromN<TSource, TTarget>(this IFieldName<TTarget> targetName,
             IEnumerable<IVersionedValue<TSource>> sourceFields, Func<IEnumerable<TSource>, TTarget> transform)
         {
-            return new VersionedField<TTarget>(targetName,
-                Versioned.FromN(sourceFields.AsVersioned(), transform));
+            return new VersionedField<TTarget>(targetName, Versioned.FromN(sourceFields, transform));
         }
 
         public static IField<TTarget> FromN<TSource, TTarget>(this IFieldName<TTarget> targetName,
-            IVersionedValue<IEnumerable<IVersionedValue<TSource>>> sourceFields,
+            IVersionedEnumerable<IVersionedValue<TSource>> sourceFields,
             Func<IEnumerable<TSource>, TTarget> transform)
         {
             return new VersionedField<TTarget>(targetName, Versioned.FromN(sourceFields, transform));

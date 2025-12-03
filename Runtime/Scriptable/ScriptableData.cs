@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Platonic.Core;
 using UnityEngine;
 
@@ -36,6 +37,11 @@ namespace Platonic.Scriptable
         public IField<T> GetField<T>(IFieldName<T> fieldName)
         {
             return Data.GetField(fieldName);
+        }
+
+        public bool TryGetField<T>(IFieldName<T> fieldName, [NotNullWhen(true)] out IField<T>? field)
+        {
+            return Data.TryGetField(fieldName, out field);
         }
     }
 }

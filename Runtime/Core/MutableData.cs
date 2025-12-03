@@ -61,6 +61,18 @@ namespace Platonic
             return GetField(fieldName);
         }
 
+        public bool TryGetField<T>(IFieldName<T> fieldName, [NotNullWhen(true)] out IField<T>? field)
+        {
+            field = null;
+            var has = !_fields.TryGetValue(fieldName.Id, out var untypedField);
+            if(has)
+            {
+                field = untypedField as IField<T>;
+            }
+
+            return has;
+        }
+
         public Field<T> GetField<T>(IFieldName<T> fieldName)
         {
             var field = GetField((IFieldName)fieldName);
