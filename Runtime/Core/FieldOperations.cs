@@ -19,14 +19,14 @@ namespace Platonic.Core
             Func<TSource, TSource> transform)
         {
             var sourceField = source.GetField(sourceName);
-            return new VersionedField<TSource>(sourceName, Versioned.From(sourceField, transform));
+            return new VersionedField<TSource>(sourceName, Version.Versioned.From(sourceField, transform));
         }
 
         public static IField<TTarget> BorrowedAs<TSource, TTarget>(this IFieldName<TTarget> targetName,
             IData source, IFieldName<TSource> sourceName, Func<TSource, TTarget> transform)
         {
             var sourceField = source.GetField(sourceName);
-            return new VersionedField<TTarget>(targetName, Versioned.From(sourceField, transform));
+            return new VersionedField<TTarget>(targetName, Version.Versioned.From(sourceField, transform));
         }
 
         public static IField<TSource> BorrowedAs<TSource>(this IFieldName<TSource> targetName,
@@ -50,7 +50,7 @@ namespace Platonic.Core
         public static IField<TTarget> From<TSource, TTarget>(this IFieldName<TTarget> targetName,
             IVersionedValue<TSource> sourceField, Func<TSource, TTarget> transform)
         {
-            return new VersionedField<TTarget>(targetName, Versioned.From(sourceField, transform));
+            return new VersionedField<TTarget>(targetName, Version.Versioned.From(sourceField, transform));
         }
 
         public static IField<TTarget> From<TSource1, TSource2, TTarget>(
@@ -58,7 +58,7 @@ namespace Platonic.Core
             IVersionedValue<TSource2> sourceField2,
             Func<TSource1, TSource2, TTarget> transform)
         {
-            return new VersionedField<TTarget>(targetName, Versioned.From(sourceField1, sourceField2, transform));
+            return new VersionedField<TTarget>(targetName, Version.Versioned.From(sourceField1, sourceField2, transform));
         }
 
         public static IField<TTarget> From<TSource1, TSource2, TSource3,
@@ -69,7 +69,7 @@ namespace Platonic.Core
             IVersionedValue<TSource3> sourceField3,
             Func<TSource1, TSource2, TSource3, TTarget> transform)
         {
-            return new VersionedField<TTarget>(targetName, Versioned.From(sourceField1, sourceField2, sourceField3, transform));
+            return new VersionedField<TTarget>(targetName, Version.Versioned.From(sourceField1, sourceField2, sourceField3, transform));
         }
 
         public static IField<TTarget> From<TSource1, TSource2,
@@ -82,7 +82,7 @@ namespace Platonic.Core
             IVersionedValue<TSource4> sourceField4,
             Func<TSource1, TSource2, TSource3, TSource4, TTarget> transform)
         {
-            return new VersionedField<TTarget>(targetName, Versioned.From(sourceField1, sourceField2, sourceField3, sourceField4, transform));
+            return new VersionedField<TTarget>(targetName, Version.Versioned.From(sourceField1, sourceField2, sourceField3, sourceField4, transform));
         }
 
         public static IField<TTarget> From<TSource1, TSource2,
@@ -95,7 +95,7 @@ namespace Platonic.Core
             IVersionedValue<TSource5> sourceField5,
             Func<TSource1, TSource2, TSource3, TSource4, TSource5, TTarget> transform)
         {
-            return new VersionedField<TTarget>(targetName, Versioned.From(sourceField1, sourceField2, sourceField3, sourceField4, sourceField5, transform));
+            return new VersionedField<TTarget>(targetName, Version.Versioned.From(sourceField1, sourceField2, sourceField3, sourceField4, sourceField5, transform));
         }
 
         public static IField<TTarget> From<TSource1, TSource2,
@@ -109,20 +109,25 @@ namespace Platonic.Core
             IVersionedValue<TSource6> sourceField6,
             Func<TSource1, TSource2, TSource3, TSource4, TSource5, TSource6, TTarget> transform)
         {
-            return new VersionedField<TTarget>(targetName, Versioned.From(sourceField1, sourceField2, sourceField3, sourceField4, sourceField5, sourceField6, transform));
+            return new VersionedField<TTarget>(targetName, Version.Versioned.From(sourceField1, sourceField2, sourceField3, sourceField4, sourceField5, sourceField6, transform));
         }
         
         public static IField<TTarget> FromN<TSource, TTarget>(this IFieldName<TTarget> targetName,
             IEnumerable<IVersionedValue<TSource>> sourceFields, Func<IEnumerable<TSource>, TTarget> transform)
         {
-            return new VersionedField<TTarget>(targetName, Versioned.FromN(sourceFields, transform));
+            return new VersionedField<TTarget>(targetName, Version.Versioned.FromN(sourceFields, transform));
         }
 
         public static IField<TTarget> FromN<TSource, TTarget>(this IFieldName<TTarget> targetName,
             IVersionedEnumerable<IVersionedValue<TSource>> sourceFields,
             Func<IEnumerable<TSource>, TTarget> transform)
         {
-            return new VersionedField<TTarget>(targetName, Versioned.FromN(sourceFields, transform));
+            return new VersionedField<TTarget>(targetName, Version.Versioned.FromN(sourceFields, transform));
+        }
+        
+        public static IField<TValue> Calculate<TValue>(this IFieldName<TValue> name, Func<TValue> calculationFunc)
+        {
+            return Versioned.Calculate(calculationFunc).RenameAs(name);
         }
     }
 }

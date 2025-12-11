@@ -97,5 +97,10 @@ namespace Platonic.Version
         {
             return new VersionedLookup<TSource, TVersionedTarget, TFinalTarget>(sourceField, lookup, transform);
         }
+        
+        public static IVersionedValue<TValue> Calculate<TValue>(Func<TValue> calculationFunc)
+        {
+            return new CalculatedVersionedValue<TValue>(calculationFunc);
+        }
     }
 }

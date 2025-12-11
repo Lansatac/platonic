@@ -9,15 +9,14 @@ namespace Platonic.Core
     //Field that derives it's value from non-versioned sources
     //and updates it's version if the value has changed.
     //Exists primarily to bridge unversioned data to versioned Data
-    public class CalculatedField<TValue> : IField<TValue>
+    public class CalculatedVersionedValue<TValue> : IVersionedValue<TValue>
     {
         private readonly Func<TValue> _calculationFunc;
         private TValue _value;
         private ulong _version = Versions.Initial;
         
-        public CalculatedField(IFieldName<TValue> name, Func<TValue> calculationFunc)
+        public CalculatedVersionedValue(Func<TValue> calculationFunc)
         {
-            Name = name;
             _calculationFunc = calculationFunc;
             _value = calculationFunc();
         }
@@ -31,8 +30,6 @@ namespace Platonic.Core
             }
         }
 
-        IFieldName IField.Name => Name;
-
         public TValue Value
         {
             get
@@ -41,11 +38,7 @@ namespace Platonic.Core
                 return _value;
             }
         }
-
-        public IFieldName<TValue> Name { get; }
-
-        object? IField.Value => Value;
-
+        
         private void UpdateValueIfNeeded()
         {
             TValue newValue = _calculationFunc();
@@ -58,15 +51,7 @@ namespace Platonic.Core
 
         public override string ToString()
         {
-            return $"{Name}: {Value}";
-        }
-    }
-
-    public static class CalculatedFieldExtensions
-    {
-        public static CalculatedField<TValue> Calculate<TValue>(this IFieldName<TValue> name, Func<TValue> calculationFunc)
-        {
-            return new CalculatedField<TValue>(name, calculationFunc);
+            return $"{Value}";
         }
     }
 }
