@@ -49,19 +49,22 @@ namespace Platonic.Editor.Scriptable
 
             var searchField = new TextField
             {
-                label = "Search:", // Optional: add a label
-                style = { marginBottom = 5 } // Add some spacing
+                label = "Search:",
+                style = { marginBottom = 5 }
             };
             searchField.RegisterValueChangedCallback(evt =>
             {
                 PopulateScrollView(evt.newValue);
             });
             root.Add(searchField);
+            
+            // Auto-focus the search field
+            searchField.schedule.Execute(() => searchField.Focus());
 
             _scrollView = new ScrollView(ScrollViewMode.Vertical);
             root.Add(_scrollView);
 
-            PopulateScrollView(string.Empty); // Initial population
+            PopulateScrollView(string.Empty);
         }
 
         private void PopulateScrollView(string filter)
@@ -83,14 +86,35 @@ namespace Platonic.Editor.Scriptable
                         editorWindow.Close();
                     })
                     {
-                        text = _displayOptions[capturedIndex],
                         style =
                         {
+                            flexDirection = FlexDirection.Row,
+                            justifyContent = Justify.SpaceBetween,
+                            alignItems = Align.Center,
                             unityTextAlign = TextAnchor.MiddleLeft,
                             paddingLeft = 5,
                             height = EditorGUIUtility.singleLineHeight + 2
                         }
                     };
+                    var nameLabel = new Label(_allNames[capturedIndex].Name)
+                    {
+                        style =
+                        {
+                            flexGrow = 1,
+                            unityTextAlign = TextAnchor.MiddleLeft
+                        }
+                    };
+                    var typeLabel = new Label(_allNames[capturedIndex].FieldType.Name)
+                    {
+                        style =
+                        {
+                            flexShrink = 0,
+                            marginLeft = 8,
+                            unityTextAlign = TextAnchor.MiddleRight
+                        }
+                    };
+                    button.Add(nameLabel);
+                    button.Add(typeLabel);
                     _scrollView.Add(button);
                 }
             }
@@ -176,7 +200,9 @@ namespace Platonic.Editor.Scriptable
 
             var allNames = Names.Instance.GetAssignableToType(nameType).ToList();
             // This list is used for display in the popup
-            var displayOptionsForPopup = allNames.Select(fieldName => fieldName.Name).ToList();
+            var displayOptionsForPopup = allNames
+                .Select(fieldName => $"{fieldName.Name}({fieldName.FieldType.Name})")
+                .ToList();
 
             var idProperty = property.FindPropertyRelative("ID");
             int index = 0;

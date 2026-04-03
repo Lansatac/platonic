@@ -13,14 +13,16 @@ namespace Platonic.Collections
 
     public interface IVersionedReadOnlyDictionary<TKey, TValue> :
         IReadOnlyDictionary<TKey, TValue>,
-        IVersionedReadOnlyCollection<KeyValuePair<TKey, TValue>>
+        IVersionedReadOnlyCollection<KeyValuePair<TKey, TValue>>,
+        IVersionedValue<IVersionedReadOnlyDictionary<TKey, TValue>>
     {
         
     }
     
     public interface IVersionedDictionary<TKey, TValue> :
         IDictionary<TKey, TValue>,
-        IVersionedCollection<KeyValuePair<TKey, TValue>>
+        IVersionedCollection<KeyValuePair<TKey, TValue>>,
+        IVersionedReadOnlyDictionary<TKey, TValue>
     {
         
     }

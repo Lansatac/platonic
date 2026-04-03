@@ -12,7 +12,7 @@ namespace Platonic.Core
         private readonly Func<TVersionedTarget?, TFinalTarget> _transform;
 
         private ulong _cachedSourceVersion = Versions.None;
-        private ulong _cachedTargetVersion = Versions.None;
+        private ulong? _cachedTargetVersion = Versions.None;
 
         private IVersionedValue<TVersionedTarget>? _target;
         private TFinalTarget? _cachedValue;
@@ -48,9 +48,9 @@ namespace Platonic.Core
                 _cachedTargetVersion = Versions.None;
                 ++_version;
             }
-
-            if (_cachedTargetVersion == _target?.Version) return _cachedValue!;
-            _cachedTargetVersion = _target?.Version ?? Versions.None;
+            
+            if (_cachedTargetVersion == (_target?.Version)) return _cachedValue!;
+            _cachedTargetVersion = _target?.Version;
             _cachedValue = _transform(_target != null ? _target.Value : default);
             ++_version;
             return _cachedValue;
@@ -65,7 +65,7 @@ namespace Platonic.Core
         private readonly Func<TVersionedTarget?, TFinalTarget> _transform;
 
         private ulong _cachedSourceVersion = Versions.None;
-        private ulong _cachedTargetVersion = Versions.None;
+        private ulong? _cachedTargetVersion = Versions.None;
 
         private IVersionedValue<TVersionedTarget>? _target;
         private TFinalTarget? _cachedValue;
@@ -104,7 +104,7 @@ namespace Platonic.Core
             }
 
             if (_cachedTargetVersion == _target?.Version) return _cachedValue!;
-            _cachedTargetVersion = _target?.Version ?? Versions.None;
+            _cachedTargetVersion = _target?.Version;
             _cachedValue = _transform(_target != null ? _target.Value : default);
             ++_version;
 

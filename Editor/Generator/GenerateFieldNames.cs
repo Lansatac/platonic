@@ -73,7 +73,7 @@ namespace Platonic.Editor.Generator
             foreach (var names in allNames)
             {
                 var generatedFile =
-                    new FileInfo($"{Path.Combine("Assets/" + names.OutputPath, names.Namespace)}.generated.cs");
+                    new FileInfo($"{Path.Combine("Assets/" + names.OutputPath, names.name)}.generated.cs");
                 generatedFile.Directory!.Create();
                 Debug.Log($"Generating {generatedFile.FullName}");
 

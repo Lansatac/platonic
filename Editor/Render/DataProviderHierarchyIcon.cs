@@ -21,7 +21,7 @@ namespace Platonic.Editor.Render
         private static void HandleHierarchyWindowItemOnGUI(int instanceID, Rect selectionRect)
         {
             // Get the GameObject instance from the ID
-            var instance = EditorUtility.InstanceIDToObject(instanceID) as GameObject;
+            var instance = EditorUtility.EntityIdToObject(instanceID) as GameObject;
             
             if (instance == null) return;
             

@@ -35,13 +35,5 @@ namespace Platonic.Core
                     source => source?.GetField(targetName), t => t ?? defaultValue)
                 .RenameAs(targetName);
         }
-
-
-        public static IField<TTarget> LookupField<TSource, TTarget>(this IFieldName<TTarget> targetName,
-            IVersionedValue<TSource> sourceField, Func<TSource, IData?> lookup, TTarget defaultValue)
-        {
-            return new VersionedLookup<TSource, TTarget, TTarget>(sourceField,
-                (source) => lookup(source)?.GetField(targetName), t => t ?? defaultValue).RenameAs(targetName);
-        }
     }
 }

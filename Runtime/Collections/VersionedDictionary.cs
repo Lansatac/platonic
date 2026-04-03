@@ -91,9 +91,15 @@ namespace Platonic.Collections
             }
         }
 
+        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
+
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
+
         public ICollection<TKey> Keys => _internalDictionary.Keys;
         public ICollection<TValue> Values => _internalDictionary.Values;
         public ulong Version { get; private set; } = Versions.Initial;
-        public IVersionedEnumerable<KeyValuePair<TKey, TValue>> Value => this;
+
+        IVersionedEnumerable<KeyValuePair<TKey, TValue>> IVersionedValue<IVersionedEnumerable<KeyValuePair<TKey, TValue>>>.Value => this;
+        public IVersionedReadOnlyDictionary<TKey, TValue> Value => this;
     }
 }
