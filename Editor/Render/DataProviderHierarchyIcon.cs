@@ -14,14 +14,14 @@ namespace Platonic.Editor.Render
 
         static DataProviderHierarchyIcon()
         {
-            EditorApplication.hierarchyWindowItemOnGUI += HandleHierarchyWindowItemOnGUI;
+            EditorApplication.hierarchyWindowItemByEntityIdOnGUI += HandleHierarchyWindowItemOnGUI;
             _dataProviderIcon = EditorGUIUtility.IconContent("d_ScriptableObject Icon");
         }
 
-        private static void HandleHierarchyWindowItemOnGUI(int instanceID, Rect selectionRect)
+        private static void HandleHierarchyWindowItemOnGUI(EntityId entityId, Rect selectionRect)
         {
             // Get the GameObject instance from the ID
-            var instance = EditorUtility.EntityIdToObject(instanceID) as GameObject;
+            var instance = EditorUtility.EntityIdToObject(entityId) as GameObject;
             
             if (instance == null) return;
             
