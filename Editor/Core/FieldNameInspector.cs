@@ -23,7 +23,7 @@ namespace Platonic.Editor.Core
             var dropdownField = element.Q<DropdownField>("TypeDropdown");
             dropdownField.RegisterValueChangedCallback(evt =>
             {
-                typeName.style.visibility = evt.newValue == "Custom" ? Visibility.Visible : Visibility.Hidden;
+                typeName.style.visibility = evt.newValue == SerializableFieldNameDefinition.FieldType.custom.ToString() ? Visibility.Visible : Visibility.Hidden;
             });
 
             return element;

@@ -5,7 +5,6 @@ using System.Linq;
 using Platonic.Core;
 using Platonic.Render;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Cursor = UnityEngine.UIElements.Cursor;
@@ -151,6 +150,63 @@ namespace Platonic.Editor.Render
                     var fieldNames = requestedFields.Select(f => f.FieldName).Distinct();
                     var copyText = string.Join("\n", fieldNames);
                     GUIUtility.systemCopyBuffer = copyText;
+                };
+            }
+
+            // Setup Add Preview Fields Button
+            var addPreviewFieldsButton = root.Q<Button>("AddPreviewFieldsButton");
+            if (addPreviewFieldsButton != null)
+            {
+                addPreviewFieldsButton.clicked += () =>
+                {
+                    var previewFieldsProp = serializedObject.FindProperty("PreviewFields");
+                    if (previewFieldsProp == null) return;
+
+                    serializedObject.Update();
+
+                    var existingNames = new HashSet<string>();
+                    for (int i = 0; i < previewFieldsProp.arraySize; i++)
+                    {
+                        var element = previewFieldsProp.GetArrayElementAtIndex(i);
+                        var nameProp = element.FindPropertyRelative("_fieldName");
+                        if (nameProp != null && !string.IsNullOrEmpty(nameProp.stringValue))
+                        {
+                            existingNames.Add(nameProp.stringValue);
+                        }
+                    }
+
+                    var addedAny = false;
+                    foreach (var field in requestedFields)
+                    {
+                        if (!existingNames.Contains(field.FieldName))
+                        {
+                            int index = previewFieldsProp.arraySize;
+                            previewFieldsProp.InsertArrayElementAtIndex(index);
+                            var element = previewFieldsProp.GetArrayElementAtIndex(index);
+                            var nameProp = element.FindPropertyRelative("_fieldName");
+                            if (nameProp != null)
+                            {
+                                nameProp.stringValue = field.FieldName;
+
+                                var intProp = element.FindPropertyRelative("_intValue");
+                                if (intProp != null) intProp.intValue = 0;
+                                var floatProp = element.FindPropertyRelative("_floatValue");
+                                if (floatProp != null) floatProp.floatValue = 0f;
+                                var boolProp = element.FindPropertyRelative("_boolValue");
+                                if (boolProp != null) boolProp.boolValue = false;
+                                var stringProp = element.FindPropertyRelative("_stringValue");
+                                if (stringProp != null) stringProp.stringValue = string.Empty;
+                            }
+
+                            existingNames.Add(field.FieldName);
+                            addedAny = true;
+                        }
+                    }
+
+                    if (addedAny)
+                    {
+                        serializedObject.ApplyModifiedProperties();
+                    }
                 };
             }
 

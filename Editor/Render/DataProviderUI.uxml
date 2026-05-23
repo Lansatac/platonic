@@ -4,6 +4,7 @@
     <uie:PropertyField binding-path="Fields" name="Fields" label="Fields" />
     <ui:VisualElement style="flex-direction: row; align-items: center;">
         <ui:Label tabindex="-1" text="Requested Fields by Renderers:" display-tooltip-when-elided="true" style="flex-grow: 1;" />
+        <ui:Button text="Add Preview Fields" name="AddPreviewFieldsButton" style="margin-right: 5px;" />
         <ui:Button text="📋" name="CopyFieldNamesButton" />
     </ui:VisualElement>
     <ui:ListView focusable="true" name="RequestedFieldsPreview" header-title="Requested Fields by Renderers:" virtualization-method="FixedHeight" fixed-item-height="15" show-border="true" />
