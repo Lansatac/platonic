@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using Platonic.Core;
 using Platonic.Version;
@@ -18,27 +19,53 @@ namespace Platonic.Scriptable
         protected abstract object? GetValue();
     }
 
-    public abstract class ScriptableField<T> : ScriptableField, IField<T>, ISerializationCallbackReceiver
+    public abstract class ScriptableField<T> : ScriptableField, IMutableField<T>, ISerializationCallbackReceiver
     {
         IFieldName IField.Name => Name;
-        object IField.Value => Value!;
 
-        private T? _cachedValue;
-        [SerializeField] private T? _value;
-
-        protected virtual T? GetSerializedValue()
+        object? IMutableField.Value
         {
-            return _value;
+            get => Value;
+            set
+            {
+                if (value == null)
+                {
+                    if (default(T) == null)
+                    {
+                        Value = default!;
+                    }
+                    else
+                    {
+                        throw new Exception($"Cannot assign null to non-nullable field of type {typeof(T).Name}");
+                    }
+                }
+                else
+                {
+                    if (value is not T castValue)
+                        throw new Exception(
+                            $"Cannot assign a value of type {value.GetType().Name} to field of type {typeof(T).Name}");
+                    Value = castValue;
+                }
+            }
+        }
+
+
+        private T? _setValue;
+        [SerializeField] private T _serializedValue = default!;
+
+        protected virtual T GetSerializedValue()
+        {
+            return _serializedValue;
         }
 
         public T Value
         {
-            get => _cachedValue ?? GetSerializedValue()!;
+            get => _setValue ?? GetSerializedValue();
             set
             {
-                if (!EqualityComparer<T?>.Default.Equals(_cachedValue, value))
+                if (!EqualityComparer<T?>.Default.Equals(_setValue, value))
                 {
-                    _cachedValue = value;
+                    _setValue = value;
                     Version += 1;
                 }
             }
@@ -70,7 +97,7 @@ namespace Platonic.Scriptable
 
         public void OnAfterDeserialize()
         {
-            Value = GetSerializedValue()!;
+            Version += 1;
         }
     }
 }

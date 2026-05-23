@@ -16,21 +16,35 @@ namespace Platonic.Core
 
         IFieldName IField.Name => Name;
 
-        object IMutableField.Value
+        object? IMutableField.Value
         {
             get => Value;
             set
             {
-                if (value is not T castValue)
+                if (value == null)
                 {
-                    throw new Exception($"Cannot set value of type {value.GetType()} to type {typeof(T)}");
+                    if (default(T) == null)
+                    {
+                        Value = default!;
+                    }
+                    else
+                    {
+                        throw new Exception($"Cannot assign null to non-nullable field of type {typeof(T).Name}");
+                    }
                 }
+                else
+                {
+                    if (value is not T castValue)
+                    {
+                        throw new Exception($"Cannot set value of type {value.GetType()} to type {typeof(T)}");
+                    }
 
-                _value = castValue;
+                    Value = castValue;
+                }
             }
         }
 
-        object IField.Value => Value;
+        object? IField.Value => Value;
 
         [SerializeField] private T _value;
 
@@ -41,6 +55,7 @@ namespace Platonic.Core
             {
                 if (Equals(_value, value)) return;
                 _value = value;
+                _cachedValueVersion = null;
                 Versions.Increment(ref _version);
             }
         }
@@ -49,8 +64,23 @@ namespace Platonic.Core
 
         public IFieldName<T> Name => _name;
 
+        private ulong? _cachedValueVersion = null;
         private ulong _version = Versions.Initial;
-        public ulong Version => _version;
+        public ulong Version
+        {
+            get
+            {
+                if (_value is IVersioned versioned)
+                {
+                    if (_cachedValueVersion != versioned.Version)
+                    {
+                        _cachedValueVersion = versioned.Version;
+                        Versions.Increment(ref _version);
+                    }
+                }
+                return _version;
+            }
+        }
 
         /// <summary>
         /// Call in cases where the value of a referenced object may change, but the reference does not.
@@ -72,7 +102,8 @@ namespace Platonic.Core
         {
             if (_version == Versions.None)
                 _version = Versions.Initial;
-            _version += 1;
+            _cachedValueVersion = null; // Ensure caching is reset after deserialization
+            Versions.Increment(ref _version);
         }
 
         public override string ToString()
