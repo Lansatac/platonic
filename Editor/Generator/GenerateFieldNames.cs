@@ -85,11 +85,7 @@ namespace Platonic.Editor.Generator
                 var usings = new HashSet<string> { "Platonic", "Platonic.Core", "UnityEngine" };
                 foreach (var name in names.Names)
                 {
-                    if (name.Type is SerializableFieldNameDefinition.FieldType.IEnumerable_int or
-                        SerializableFieldNameDefinition.FieldType.IEnumerable_float or
-                        SerializableFieldNameDefinition.FieldType.IEnumerable_bool or
-                        SerializableFieldNameDefinition.FieldType.IEnumerable_string or
-                        SerializableFieldNameDefinition.FieldType.IEnumerable_IData)
+                    if (IsEnumerable(name))
                     {
                         usings.Add("System.Collections.Generic");
                         break;
@@ -130,17 +126,7 @@ namespace Platonic.Editor.Generator
                 {
                     if (!usedNames.Contains(name.Name))
                     {
-                        var fieldType = name.Type switch
-                        {
-                            SerializableFieldNameDefinition.FieldType.custom => name.CustomTypeName,
-                            SerializableFieldNameDefinition.FieldType.IEnumerable_int => "IEnumerable<int>",
-                            SerializableFieldNameDefinition.FieldType.IEnumerable_float => "IEnumerable<float>",
-                            SerializableFieldNameDefinition.FieldType.IEnumerable_bool => "IEnumerable<bool>",
-                            SerializableFieldNameDefinition.FieldType.IEnumerable_string => "IEnumerable<string>",
-                            SerializableFieldNameDefinition.FieldType.IData => "IData",
-                            SerializableFieldNameDefinition.FieldType.IEnumerable_IData => "IEnumerable<IData>",
-                            _ => name.Type.ToString()
-                        };
+                        var fieldType = GetFieldType(name);
                         source.AppendLine(
                             $"\t\tpublic static readonly FieldName<{fieldType}> {name.Name} = Platonic.Core.Names.Register<{fieldType}>(\"{names.Namespace}.\" + nameof({name.Name}));");
                         usedNames.Add(name.Name);
@@ -162,17 +148,7 @@ namespace Platonic.Editor.Generator
                 
                 foreach (var name in names.Names)
                 {
-                    var fieldType = name.Type switch
-                    {
-                        SerializableFieldNameDefinition.FieldType.custom => name.CustomTypeName,
-                        SerializableFieldNameDefinition.FieldType.IEnumerable_int => "IEnumerable<int>",
-                        SerializableFieldNameDefinition.FieldType.IEnumerable_float => "IEnumerable<float>",
-                        SerializableFieldNameDefinition.FieldType.IEnumerable_bool => "IEnumerable<bool>",
-                        SerializableFieldNameDefinition.FieldType.IEnumerable_string => "IEnumerable<string>",
-                        SerializableFieldNameDefinition.FieldType.IData => "IData",
-                        SerializableFieldNameDefinition.FieldType.IEnumerable_IData => "IEnumerable<IData>",
-                        _ => name.Type.ToString()
-                    };
+                    var fieldType = GetFieldType(name);
                     source.AppendLine(
                         $"\t\tpublic static {fieldType} Get_{name.Name}(this IData data) {{return data.GetField({names.ClassName}.{name.Name}).Value;}}");
                     usedNames.Add(name.Name);
@@ -203,6 +179,32 @@ namespace Platonic.Editor.Generator
 
             AssetDatabase.Refresh();
             AssetDatabase.SaveAssets();
+        }
+
+        private static string GetFieldType(SerializableFieldNameDefinition name)
+        {
+            var fieldType = GetElementFieldType(name);
+            if (IsEnumerable(name))
+            {
+                fieldType = $"IEnumerable<{fieldType}>";
+            }
+
+            return name.Nullable && !fieldType.EndsWith("?") ? $"{fieldType}?" : fieldType;
+        }
+
+        private static string GetElementFieldType(SerializableFieldNameDefinition name)
+        {
+            return name.Type switch
+            {
+                SerializableFieldNameDefinition.FieldType.custom => name.CustomTypeName,
+                SerializableFieldNameDefinition.FieldType.IData => "IData",
+                var fieldType => fieldType.ToString()
+            };
+        }
+
+        private static bool IsEnumerable(SerializableFieldNameDefinition name)
+        {
+            return name.Enumerable;
         }
     }
 }
