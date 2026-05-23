@@ -12,19 +12,19 @@ namespace Platonic.Editor.Tests
         [Test]
         public void NewDataShouldContainInitialFields()
         {
-            var data1 = new Data(new Field<int>(TestInt, 5));
+            var data1 = new Data(new MutableField<int>(TestInt, 5));
             Assert.That(data1.Fields.Select(f=>f.Name.Id), Is.EquivalentTo(new []{TestInt.Id}));
             
-            var data2 = new Data(new Field<int>(TestInt, 5), new Field<float>(TestFloat, 5f));
+            var data2 = new Data(new MutableField<int>(TestInt, 5), new MutableField<float>(TestFloat, 5f));
             Assert.That(data2.Fields.Select(f=>f.Name.Id), Is.EquivalentTo(new []{TestInt.Id, TestFloat.Id}));
         }
 
         [Test]
         public void MutableDataGetField()
         {
-            var field = new Field<int>(TestInt, 5);
+            var field = new MutableField<int>(TestInt, 5);
             var mutableData = new MutableData(field);
-            var results = mutableData.TryGetField<int>(field.Name.Id, out var retrievedField);
+            var results = mutableData.TryGetField(field.Name, out var retrievedField);
             Assert.That(results, Is.True);
             Assert.That(retrievedField, Is.EqualTo(field));
         }

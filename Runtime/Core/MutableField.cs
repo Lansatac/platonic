@@ -6,34 +6,46 @@ using UnityEngine;
 namespace Platonic.Core
 {
     [Serializable]
-    public class Field<T> : IField<T>, ISerializationCallbackReceiver
+    public class MutableField<T> : IMutableField<T>, ISerializationCallbackReceiver
     {
-        public Field(FieldName<T> name, T value)
+        public MutableField(FieldName<T> name, T value)
         {
             _value = value;
             _name = name;
         }
 
         IFieldName IField.Name => Name;
-        object IField.Value => Value!;
 
-        [SerializeField]
-        private T _value;
+        object IMutableField.Value
+        {
+            get => Value;
+            set
+            {
+                if (value is not T castValue)
+                {
+                    throw new Exception($"Cannot set value of type {value.GetType()} to type {typeof(T)}");
+                }
+
+                _value = castValue;
+            }
+        }
+
+        object IField.Value => Value;
+
+        [SerializeField] private T _value;
+
         public T Value
         {
             get => _value;
             set
             {
-                if (!Equals(_value, value))
-                {
-                    _value = value;
-                    Versions.Increment(ref _version);
-                }
+                if (Equals(_value, value)) return;
+                _value = value;
+                Versions.Increment(ref _version);
             }
         }
 
-        [SerializeField]
-        private FieldName<T> _name;
+        [SerializeField] private FieldName<T> _name;
 
         public IFieldName<T> Name => _name;
 
@@ -48,17 +60,17 @@ namespace Platonic.Core
         {
             _version += 1;
         }
-        
-        public static implicit operator T(Field<T> field) => field._value;
-        
-        
+
+        public static implicit operator T(MutableField<T> mutableField) => mutableField._value;
+
+
         public void OnBeforeSerialize()
         {
         }
 
         public void OnAfterDeserialize()
         {
-            if(_version == Versions.None)
+            if (_version == Versions.None)
                 _version = Versions.Initial;
             _version += 1;
         }

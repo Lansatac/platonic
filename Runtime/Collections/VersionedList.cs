@@ -10,6 +10,7 @@ namespace Platonic.Collections
     public class VersionedList<T> : IVersionedList<T>, IVersionedList, IVersionedReadOnlyList<T>
     {
         private readonly List<T> _internalList = new();
+        private IVersionedReadOnlyList<T> _value;
 
         public ulong Version { get; private set; } = Versions.Initial;
         public IVersionedEnumerable<T> Value => this;
@@ -143,5 +144,7 @@ namespace Platonic.Collections
         }
         
         public int Count => _internalList.Count;
+
+        IVersionedReadOnlyList<T> IVersionedValue<IVersionedReadOnlyList<T>>.Value => this;
     }
 }

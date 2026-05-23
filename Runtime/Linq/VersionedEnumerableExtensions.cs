@@ -17,6 +17,12 @@ namespace Platonic.Linq
             return new VersionedSelector<TSource, TTarget>(source, selector);
         }
 
+        public static IVersionedEnumerable<TResult> VersionedSelectMany<TSource, TResult>(
+            this IVersionedEnumerable<TSource> source, Func<TSource, IEnumerable<TResult>> selector)
+        {
+            return new VersionedSelectManyImpl<TSource, TResult>(source, selector);
+        }
+
         public static IVersionedEnumerable<TSource> VersionedWhere<TSource>(
             this IVersionedEnumerable<TSource> source,
             Func<TSource, bool> predicate)
@@ -167,6 +173,26 @@ namespace Platonic.Linq
             public override ulong Version => _source.Version;
 
             protected override IEnumerable<TTarget> GetUncached() => _uncachedSource.Select(_selector);
+        }
+
+        private sealed class VersionedSelectManyImpl<TSource, TResult> : CachedVersionedEnumerable<TResult>
+        {
+            private readonly IVersionedEnumerable<TSource> _source;
+            private readonly IEnumerable<TSource> _uncachedSource;
+            private readonly Func<TSource, IEnumerable<TResult>> _selector;
+
+            public VersionedSelectManyImpl(IVersionedEnumerable<TSource> source, Func<TSource, IEnumerable<TResult>> selector)
+            {
+                _source = source;
+                _uncachedSource = source is ICachingVersionedEnumerable<TSource> cachingSource
+                    ? cachingSource.Uncached
+                    : source;
+                _selector = selector;
+            }
+
+            public override ulong Version => _source.Version;
+
+            protected override IEnumerable<TResult> GetUncached() => _uncachedSource.SelectMany(_selector);
         }
 
         private sealed class VersionedFilter<TSource> : CachedVersionedEnumerable<TSource>

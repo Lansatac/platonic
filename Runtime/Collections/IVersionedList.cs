@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Platonic.Version;
 
 namespace Platonic.Collections
 {
@@ -9,7 +10,8 @@ namespace Platonic.Collections
         
     }
     
-    public interface IVersionedReadOnlyList<out T> : IReadOnlyList<T>, IVersionedReadOnlyCollection<T>
+    public interface IVersionedReadOnlyList<out T> : IReadOnlyList<T>, IVersionedReadOnlyCollection<T>,
+        IVersionedValue<IVersionedReadOnlyList<T>>
     {
         
     }

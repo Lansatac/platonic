@@ -10,15 +10,16 @@ namespace Platonic
 {
     public class MutableData : IData
     {
-        public MutableData(IEnumerable<IField> fields, params IField[] paramFields) : this(fields.Concat(paramFields))
+        public MutableData(IEnumerable<IMutableField> fields, params IMutableField[] paramFields) : this(
+            fields.Concat(paramFields))
         {
         }
 
-        public MutableData(params IField[] fields) : this((IEnumerable<IField>)fields)
+        public MutableData(params IMutableField[] fields) : this((IEnumerable<IMutableField>)fields)
         {
         }
 
-        public MutableData(IEnumerable<IField> fields)
+        public MutableData(IEnumerable<IMutableField> fields)
         {
             foreach (var field in fields)
             {
@@ -37,7 +38,7 @@ namespace Platonic
             }
         }
 
-        private readonly IDictionary<ulong, IField> _fields = new Dictionary<ulong, IField>();
+        private readonly IDictionary<ulong, IMutableField> _fields = new Dictionary<ulong, IMutableField>();
 
         public IEnumerable<IField> Fields => _fields.Values;
 
@@ -46,7 +47,7 @@ namespace Platonic
             return _fields.ContainsKey(fieldName.Id);
         }
 
-        public IField GetField(IFieldName fieldName)
+        public IMutableField GetField(IFieldName fieldName)
         {
             if (!_fields.TryGetValue(fieldName.Id, out var field))
             {
@@ -56,39 +57,39 @@ namespace Platonic
             return field;
         }
 
-        IField<T> IData.GetField<T>(IFieldName<T> fieldName)
+        IField IData.GetField(IFieldName fieldName)
         {
             return GetField(fieldName);
         }
 
-        public bool TryGetField<T>(IFieldName<T> fieldName, [NotNullWhen(true)] out IField<T>? field)
+        IField<T> IData.GetField<T>(IFieldName<T> fieldName)
+        {
+            return GetField(fieldName);
+        }
+        
+        public MutableField<T> GetField<T>(IFieldName<T> fieldName)
+        {
+            var field = GetField((IFieldName)fieldName);
+            return (MutableField<T>)field;
+        }
+
+        bool IData.TryGetField<T>(IFieldName<T> fieldName, [NotNullWhen(true)] out IField<T>? field)
+        {
+            var contains = TryGetField(fieldName, out var mutableField);
+            field = mutableField;
+            return contains;
+        }
+        
+        public bool TryGetField<T>(IFieldName<T> fieldName, [NotNullWhen(true)] out MutableField<T>? field)
         {
             field = null;
             var has = _fields.TryGetValue(fieldName.Id, out var untypedField);
-            if(has)
+            if (has)
             {
-                field = untypedField as IField<T>;
+                field = untypedField as MutableField<T>;
             }
 
             return has;
-        }
-
-        public Field<T> GetField<T>(IFieldName<T> fieldName)
-        {
-            var field = GetField((IFieldName)fieldName);
-            return (Field<T>)field;
-        }
-
-        public bool TryGetField<T>(ulong fieldNameId, [NotNullWhen(true)] out Field<T>? field)
-        {
-            if (!_fields.TryGetValue(fieldNameId, out var iField))
-            {
-                field = null;
-                return false;
-            }
-
-            field = iField as Field<T>;
-            return field != null;
         }
 
         public override string ToString()

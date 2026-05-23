@@ -9,14 +9,14 @@ namespace Platonic.Core
         public static IField<TTarget> Lookup<TSource, TTarget>(this IFieldName<TTarget> targetName,
             IVersionedValue<TSource> sourceField, Func<TSource, IVersionedValue<TTarget>?> lookup, TTarget defaultValue)
         {
-            return new VersionedLookup<TSource, TTarget, TTarget>(sourceField, lookup, t => t ?? defaultValue)
+            return new VersionedLookup<TSource, TTarget, TTarget>(sourceField, lookup, t => t, defaultValue)
                 .RenameAs(targetName);
         }
         
         public static IField<TFinalTarget> Lookup<TSource, TVersionedTarget, TFinalTarget>(this IFieldName<TFinalTarget> targetName,
             IVersionedValue<TSource> sourceField, Func<TSource, IVersionedValue<TVersionedTarget>?> lookup, Func<TVersionedTarget?, TFinalTarget> transform)
         {
-            return new VersionedLookup<TSource, TVersionedTarget, TFinalTarget>(sourceField, lookup, transform)
+            return new VersionedLookup<TSource, TVersionedTarget, TFinalTarget>(sourceField, lookup, transform, default)
                 .RenameAs(targetName);
         }
 
@@ -32,7 +32,7 @@ namespace Platonic.Core
             IVersionedValue<IData?> sourceField, TTarget defaultValue)
         {
             return new VersionedLookup<IData?, TTarget, TTarget>(sourceField,
-                    source => source?.GetField(targetName), t => t ?? defaultValue)
+                    source => source?.GetField(targetName), t => t, defaultValue)
                 .RenameAs(targetName);
         }
     }

@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using Platonic.Core;
 using Platonic.Version;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -10,6 +9,7 @@ namespace Platonic.Render
     {
         protected readonly string TypeName;
         private readonly string _providerSample;
+        private readonly string _providerLateUpdateSample;
         
         private DataProvider? _provider;
         protected DataProvider? Provider => _provider;
@@ -20,6 +20,7 @@ namespace Platonic.Render
         {
             TypeName = GetType().Name;
             _providerSample = $"{TypeName} OnDataChanged";
+            _providerLateUpdateSample = $"{TypeName} ProviderLateUpdate";
         }
 
         protected void Awake()
@@ -53,7 +54,9 @@ namespace Platonic.Render
         {
             UpdateProvider();
 
+            Profiler.BeginSample(_providerLateUpdateSample, this);
             ProviderLateUpdate();
+            Profiler.EndSample();
         }
 
         protected void UpdateProvider()

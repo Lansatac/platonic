@@ -189,5 +189,36 @@ namespace Platonic.Editor.Tests.Linq
 
             Assert.That(result.Select(x => x.Id).ToArray(), Is.EqualTo(new[] { "b", "c", "a" }));
         }
+
+        [Test]
+        public void VersionedSelectMany_ProjectsValuesCorrectly()
+        {
+            var source = new VersionedList<int[]>(new[] { new[] { 1, 2 }, new[] { 3, 4 } });
+
+            var result = source.VersionedSelectMany(x => x);
+
+            Assert.That(result.ToArray(), Is.EqualTo(new[] { 1, 2, 3, 4 }));
+        }
+
+        [Test]
+        public void VersionedSelectMany_ReflectsDynamicVersionChanges()
+        {
+            var source = new VersionedList<int[]>(new[] { new[] { 1 } });
+            var result = source.VersionedSelectMany(x => x);
+
+            Assert.That(result.Version, Is.EqualTo(1));
+            source.Add(new[] { 2 });
+            Assert.That(result.Version, Is.EqualTo(2));
+            Assert.That(result.ToArray(), Is.EqualTo(new[] { 1, 2 }));
+        }
+
+        [Test]
+        public void VersionedSelectMany_ReturnsVersionedEnumerable_ValueIsSelf()
+        {
+            var source = new VersionedList<int[]>(new[] { new[] { 1 } });
+            var result = source.VersionedSelectMany(x => x);
+
+            Assert.That(result.Value, Is.SameAs(result));
+        }
     }
 }
