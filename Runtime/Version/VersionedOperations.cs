@@ -92,18 +92,18 @@ namespace Platonic.Version
         }
         
         public static IVersionedValue<TTarget> Lookup<TSource, TSource2, TTarget>(IVersionedValue<TSource> sourceField, IVersionedValue<TSource2> sourceField2,
-            Func<TSource, TSource2, IVersionedValue<TTarget?>?> lookup,
+            Func<TSource, TSource2, IVersionedValue<TTarget>?> lookup,
             TTarget defaultValue)
         {
             return new VersionedLookup2<TSource, TSource2, TTarget, TTarget>(sourceField, sourceField2, lookup,
-                t => t ?? defaultValue);
+                t => t, defaultValue);
         }
         
         public static IVersionedValue<TFinalTarget> Lookup<TSource, TVersionedTarget, TFinalTarget>(IVersionedValue<TSource> sourceField,
             Func<TSource, IVersionedValue<TVersionedTarget>?> lookup,
-            Func<TVersionedTarget?, TFinalTarget> transform)
+            Func<TVersionedTarget, TFinalTarget> transform)
         {
-            return new VersionedLookup<TSource, TVersionedTarget, TFinalTarget>(sourceField, lookup, transform, default);
+            return new VersionedLookup<TSource, TVersionedTarget, TFinalTarget>(sourceField, lookup, transform, default!);
         }
         
         public static IVersionedValue<TValue> Calculate<TValue>(Func<TValue> calculationFunc)

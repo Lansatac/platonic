@@ -9,7 +9,7 @@ namespace Platonic.Core
     {
         private readonly IVersionedValue<TSource> _source;
         private readonly Func<TSource, IVersionedValue<TVersionedTarget>?> _lookup;
-        private readonly Func<TVersionedTarget?, TFinalTarget> _transform;
+        private readonly Func<TVersionedTarget, TFinalTarget> _transform;
         private readonly TFinalTarget _defaultValue;
 
         private ulong _cachedSourceVersion = Versions.None;
@@ -19,8 +19,8 @@ namespace Platonic.Core
         private TFinalTarget? _cachedValue;
 
         public VersionedLookup(IVersionedValue<TSource> source,
-            Func<TSource, IVersionedValue<TVersionedTarget?>?> lookup,
-            Func<TVersionedTarget?, TFinalTarget> transform, TFinalTarget defaultValue)
+            Func<TSource, IVersionedValue<TVersionedTarget>?> lookup,
+            Func<TVersionedTarget, TFinalTarget> transform, TFinalTarget defaultValue)
         {
             _source = source;
             _lookup = lookup;
@@ -64,7 +64,8 @@ namespace Platonic.Core
         private readonly IVersionedValue<TSource1> _source1;
         private readonly IVersionedValue<TSource2> _source2;
         private readonly Func<TSource1, TSource2, IVersionedValue<TVersionedTarget>?> _lookup;
-        private readonly Func<TVersionedTarget?, TFinalTarget> _transform;
+        private readonly Func<TVersionedTarget, TFinalTarget> _transform;
+        private readonly TFinalTarget _defaultValue;
 
         private ulong _cachedSourceVersion = Versions.None;
         private ulong? _cachedTargetVersion = Versions.None;
@@ -74,12 +75,14 @@ namespace Platonic.Core
 
         public VersionedLookup2(IVersionedValue<TSource1> source1, IVersionedValue<TSource2> source2,
             Func<TSource1, TSource2, IVersionedValue<TVersionedTarget>?> lookup,
-            Func<TVersionedTarget?, TFinalTarget> transform)
+            Func<TVersionedTarget, TFinalTarget> transform,
+            TFinalTarget defaultValue)
         {
             _source1 = source1;
             _source2 = source2;
             _lookup = lookup;
             _transform = transform;
+            _defaultValue = defaultValue;
         }
 
         private ulong _version = Versions.Initial;
@@ -107,7 +110,7 @@ namespace Platonic.Core
 
             if (_cachedTargetVersion == _target?.Version) return _cachedValue!;
             _cachedTargetVersion = _target?.Version;
-            _cachedValue = _transform(_target != null ? _target.Value : default);
+            _cachedValue = _target != null ? _transform(_target.Value) : _defaultValue;
             ++_version;
 
             return _cachedValue;

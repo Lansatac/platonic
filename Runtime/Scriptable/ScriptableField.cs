@@ -97,7 +97,7 @@ namespace Platonic.Scriptable
 
         public void OnAfterDeserialize()
         {
-            Version += 1;
+            Value = GetSerializedValue()!;
         }
     }
 }

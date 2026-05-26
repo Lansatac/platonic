@@ -12,7 +12,7 @@ namespace Platonic
 
     public interface IMutableField : IField
     {
-        object? Value { get; set; }
+        new object? Value { get; set; }
     }
 
     public interface IField<out T> : IField, IVersionedValue<T>
@@ -23,6 +23,6 @@ namespace Platonic
     
     public interface IMutableField<T> : IField<T>, IMutableField
     {
-        T Value { get; set; }
+        new T Value { get; set; }
     }
 }
