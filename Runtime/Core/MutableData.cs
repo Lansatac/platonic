@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Platonic
 {
-    public class MutableData : IData
+    public class MutableData : IData, IEnumerable<IMutableField>
     {
         public MutableData(IEnumerable<IMutableField> fields, params IMutableField[] paramFields) : this(
             fields.Concat(paramFields))
@@ -90,6 +90,11 @@ namespace Platonic
             }
 
             return has;
+        }
+
+        IEnumerator<IMutableField> IEnumerable<IMutableField>.GetEnumerator()
+        {
+            return _fields.Values.GetEnumerator();
         }
 
         public override string ToString()

@@ -2,6 +2,12 @@
 {
     public class VersionedValue<TValue> : IVersionedValue<TValue>
     {
+        //For serialization
+        private VersionedValue()
+        {
+            _value = default;
+        }
+        
         public VersionedValue(TValue value)
         {
             _value = value;
