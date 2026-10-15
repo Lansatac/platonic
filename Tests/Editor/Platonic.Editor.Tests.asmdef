@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Platonic.Runtime",
-        "Platonic.Editor"
+        "Platonic.Editor",
+        "Platonic.UIToolkit"
     ],
     "includePlatforms": [
         "Editor"
