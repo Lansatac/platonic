@@ -1,9 +1,7 @@
 ﻿{
   "name": "platonic",
   "version": "0.0.1",
-  "dependencies": {
-    "com.unity.textmeshpro": "2.0.0"
-  },
+  "dependencies": {},
   "description": "A library for generalized data binding.",
   "displayName": "Platonic",
   "author": "Jason Yegge",

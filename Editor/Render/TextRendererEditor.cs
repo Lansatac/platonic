@@ -1,4 +1,5 @@
-﻿#nullable enable
+﻿#if PLATONIC_TEXTMESHPRO
+#nullable enable
 using Platonic.Render;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -19,3 +20,4 @@ namespace Platonic.Editor.Render
         }
     }
 }
+#endif
