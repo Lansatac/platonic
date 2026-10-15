@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Platonic
 {
-    public class Data : IData
+    public sealed class Data : IData
     {
         
         public Data(IEnumerable<IField> fields, params IField[] paramFields) : this(fields.Concat(paramFields))

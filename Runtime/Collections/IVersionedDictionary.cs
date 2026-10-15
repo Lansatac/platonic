@@ -16,7 +16,11 @@ namespace Platonic.Collections
         IVersionedReadOnlyCollection<KeyValuePair<TKey, TValue>>,
         IVersionedValue<IVersionedReadOnlyDictionary<TKey, TValue>>
     {
-        
+        new int Count { get; }
+        new IVersionedReadOnlyDictionary<TKey, TValue> Value { get; }
+
+        IVersionedValue<TValue?> GetValue(TKey key);
+
     }
     
     public interface IVersionedDictionary<TKey, TValue> :
@@ -24,6 +28,7 @@ namespace Platonic.Collections
         IVersionedCollection<KeyValuePair<TKey, TValue>>,
         IVersionedReadOnlyDictionary<TKey, TValue>
     {
-        
+        new int Count { get; }
+        new IVersionedDictionary<TKey, TValue> Value { get; }
     }
 }

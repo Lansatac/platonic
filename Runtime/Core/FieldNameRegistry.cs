@@ -43,6 +43,22 @@ namespace Platonic.Core
         {
             return _namesByID.Values.Where(name => type.IsAssignableFrom(name.FieldType));
         }
+
+        public IEnumerable<IFieldName> GetNamesContaining(string substring)
+        {
+            return _namesByName.Values.Where(name => name.Name.Contains(substring, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public IEnumerable<FieldName<T>> GetNames<T>()
+        {
+            return _namesByID.Values.OfType<FieldName<T>>();
+        }
+
+        public static string NameResults(IEnumerable<IFieldName> names)
+        {
+            return string.Join("\n", names.Select(n => $"{n.Name} : {n.FieldType.Name}"));
+        }
+
         public IFieldName GetName(ulong id)
         {
             if (!TryGetName(id, out var name))

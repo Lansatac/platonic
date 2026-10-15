@@ -99,7 +99,17 @@ namespace Platonic.Collections
         public ICollection<TValue> Values => _internalDictionary.Values;
         public ulong Version { get; private set; } = Versions.Initial;
 
-        IVersionedEnumerable<KeyValuePair<TKey, TValue>> IVersionedValue<IVersionedEnumerable<KeyValuePair<TKey, TValue>>>.Value => this;
+        IVersionedEnumerable<KeyValuePair<TKey, TValue>>
+            IVersionedValue<IVersionedEnumerable<KeyValuePair<TKey, TValue>>>.Value => this;
+
+        public IVersionedValue<TValue> GetValue(TKey key)
+        {
+            return Versioned.Lookup<IVersionedReadOnlyDictionary<TKey, TValue>, TValue>(this,
+                dict => dict.TryGetValue(key, out var value) ? new VersionedValue<TValue>(value) : null, default);
+        }
+
         public IVersionedReadOnlyDictionary<TKey, TValue> Value => this;
+
+        IVersionedDictionary<TKey, TValue> IVersionedDictionary<TKey, TValue>.Value => this;
     }
 }

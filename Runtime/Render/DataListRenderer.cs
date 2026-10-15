@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -12,59 +14,67 @@ namespace Platonic.Render
     {
         [SerializeField] private DataProvider _prototype = null!;
 
-        private readonly List<DataProvider> _instances = new();
-        private readonly List<DataProvider> _pool = new();
+        private readonly Dictionary<IData, (DataProvider Prototype, DataProvider Instance)> _instanceMap = new();
+        private readonly Dictionary<DataProvider, List<DataProvider>> _pools = new();
+
+        private ISelector<IData, DataProvider>? _selector;
+
+        public DataProvider GetInstance(IData data)
+        {
+            UpdateField();
+            return _instanceMap[data].Instance;
+        }
 
         protected override void ProviderAwake()
         {
+            _selector = GetComponent<ISelector<IData, DataProvider>>();
             _prototype.gameObject.SetActive(false);
         }
 
         protected override void FieldChanged(IEnumerable<IData> newValue)
         {
             var dataList = newValue?.ToList() ?? new List<IData>();
+            var newDataSet = new HashSet<IData>(dataList);
 
-            // Deactivate surplus instances and add them to the pool
-            while (_instances.Count > dataList.Count)
+            // Return instances for removed data to pool
+            var removed = _instanceMap.Keys.Where(k => !newDataSet.Contains(k)).ToList();
+            foreach (var key in removed)
             {
-                var instance = _instances[^1];
-                _instances.RemoveAt(_instances.Count - 1);
-                instance.gameObject.SetActive(false);
-                _pool.Add(instance);
+                var instance = _instanceMap[key];
+                _instanceMap.Remove(key);
+                instance.Instance.gameObject.SetActive(false);
+                if (!_pools.TryGetValue(instance.Prototype, out var instances))
+                {
+                    instances = new List<DataProvider>();
+                }
+                _pools.TryAdd(instance.Prototype, new List<DataProvider>());
+                instances.Add(instance.Instance);
             }
 
-            // Reuse or create instances for the data
+            // Reuse or create instances for each data item, maintaining order
             for (var i = 0; i < dataList.Count; i++)
             {
                 var data = dataList[i];
-                DataProvider instance;
-                if (i < _instances.Count)
+                if (!_instanceMap.TryGetValue(data, out var instance))
                 {
-                    // Reuse existing instance
-                    instance = _instances[i];
-                    instance.Data = data;
-                    instance.gameObject.SetActive(true);
-                }
-                else
-                {
-                    // Get from pool or create new
-                    if (_pool.Count > 0)
+                    var prototype = _selector?.SelectFor(data) ?? _prototype;
+                    instance.Prototype = prototype;
+                    if (_pools.TryGetValue(prototype, out var pool) && pool.Count > 0)
                     {
-                        instance = _pool[0];
-                        _pool.RemoveAt(0);
+                        instance.Instance = pool[^1];
+                        pool.RemoveAt(pool.Count - 1);
                     }
                     else
                     {
-                        instance = Instantiate(_prototype, transform);
+                        instance.Instance = Instantiate(prototype, transform);
                     }
 
-                    instance.Data = data;
-                    instance.gameObject.SetActive(true);
-                    _instances.Add(instance);
+                    instance.Instance.Data = data;
+                    instance.Instance.gameObject.SetActive(true);
+                    _instanceMap[data] = instance;
                 }
 
-                // Ensure the hierarchy order matches the data order
-                instance.transform.SetAsLastSibling();
+                instance.Instance.transform.SetSiblingIndex(i);
             }
         }
     }

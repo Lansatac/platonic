@@ -41,6 +41,12 @@ namespace Platonic.Collections
             return index;
         }
 
+        public void AddRange(IEnumerable<T> collection)
+        {
+            _internalList.AddRange(collection);
+            ++Version;
+        }
+
         public bool Contains(object? value) => ((IList)_internalList).Contains(value);
 
         public int IndexOf(object value) => ((IList)_internalList).IndexOf(value);

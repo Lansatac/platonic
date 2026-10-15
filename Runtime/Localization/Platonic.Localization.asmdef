@@ -1,0 +1,26 @@
+{
+    "name": "Platonic.Localization",
+    "rootNamespace": "Platonic",
+    "references": [
+        "GUID:22ef21ea52dcf5947b88b72a28bd0e9e",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "PLATONIC_LOCALIZATION"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.localization",
+            "expression": "",
+            "define": "PLATONIC_LOCALIZATION"
+        }
+    ],
+    "noEngineReferences": false
+}

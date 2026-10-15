@@ -36,15 +36,16 @@ namespace Platonic.Core
             return new VersionedField<TSource>(targetName, sourceField);
         }
 
-        public static IField<TSource> RenameAs<TSource>(this IVersionedValue<TSource> sourceField,
+        public static IField<TSource> RenameAs<TSource>(this IVersionedValue<TSource> sourceValue,
             IFieldName<TSource> targetName)
         {
-            return new VersionedField<TSource>(targetName, sourceField);
+            return new VersionedField<TSource>(targetName, sourceValue);
         }
 
-        public static IField<T> From<T>(this IFieldName<T> targetName, IVersionedValue<T> sourceField)
+        public static IField<T> From<T>(this IFieldName<T> targetName, IVersionedValue<T> sourceValue)
         {
-            return new VersionedField<T>(targetName, sourceField);
+            if(sourceValue is IField<T> sourceField && sourceField.Name == targetName) return sourceField;
+            return new VersionedField<T>(targetName, sourceValue);
         }
         
         public static IField<TTarget> From<TSource, TTarget>(this IFieldName<TTarget> targetName,

@@ -20,6 +20,9 @@ namespace Platonic.Core
         {
         }
         
+        public static readonly FieldName<string> Text =
+            Names.Register<string>("Platonic.Core." + nameof(Text));
+        
         public static readonly FieldName<IData> Data =
             Names.Register<IData>("Platonic.Core." + nameof(Data));
 
@@ -30,6 +33,12 @@ namespace Platonic.Core
 
     public static class BasicNameExtensions
     {
+        public static string Get_Text(this IData data)
+        {
+            return data.GetField(BasicNames.Text).Value;
+        }
+
+        
         public static IData Get_Data(this IData data)
         {
             return data.GetField(BasicNames.Data).Value;

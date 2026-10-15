@@ -1,6 +1,6 @@
 ﻿#nullable enable
 using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using Platonic.Core;
 using Platonic.Scriptable;
 using Platonic.Version;
@@ -48,9 +48,41 @@ namespace Platonic.Render
             if (_cachedFieldVersions != fieldVersions)
             {
                 _cachedFieldVersions = fieldVersions;
-                Text.text = string.Format(FormatString ?? "",
-                    _fieldsToWatch.Select(f => Data.GetField(f).Value).ToArray());
+                var args = new List<object?>();
+                foreach (var fieldName in _fieldsToWatch)
+                {
+                    if (Data.HasField(fieldName))
+                    {
+                        var value = Data.GetField(fieldName).Value;
+                        args.Add(value is int intValue
+                            ? intValue.ToString("N0", CultureInfo.CurrentCulture)
+                            : value);
+                    }
+                    else
+                    {
+                        Debug.LogWarning(
+                            $"Found no field '{fieldName.Name}' in data at {GetGameObjectPath(Provider?.gameObject!)}, render at {GetGameObjectPath(gameObject)}",
+                            this);
+                        args.Add("<missing>");
+                    }
+                }
+
+                Text.text = string.Format(FormatString ?? "", args.ToArray());
             }
+        }
+
+        private static string GetGameObjectPath(GameObject gameObject)
+        {
+            var path = gameObject.name;
+            var parent = gameObject.transform.parent;
+
+            while (parent != null)
+            {
+                path = parent.name + "/" + path;
+                parent = parent.parent;
+            }
+
+            return path;
         }
 
         private ulong CalculateFieldVersions()

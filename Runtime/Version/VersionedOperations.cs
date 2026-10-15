@@ -8,7 +8,7 @@ namespace Platonic.Version
 {
     public static class Versioned
     {
-        public static IVersionedValue<T> AsVersioned<T>(this T value)
+        public static VersionedValue<T> AsVersioned<T>(this T value)
         {
             return new VersionedValue<T>(value);
         }
@@ -109,7 +109,7 @@ namespace Platonic.Version
         public static IVersionedValue<TVersionedTarget> Lookup<TSource, TVersionedTarget>(IVersionedValue<TSource> sourceField,
             Func<TSource, IVersionedValue<TVersionedTarget>?> lookup)
         {
-            return new VersionedLookup<TSource, TVersionedTarget, TVersionedTarget>(sourceField, lookup, v=>v, default);
+            return new VersionedLookup<TSource, TVersionedTarget, TVersionedTarget>(sourceField, lookup, v=>v, default!);
         }
         
         public static IVersionedValue<TValue> Calculate<TValue>(Func<TValue> calculationFunc)
