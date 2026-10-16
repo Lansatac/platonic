@@ -1,93 +1,62 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Platonic.UIToolkit
 {
     /// <summary>
-    /// Centralized runner that manages and updates registered UI Toolkit bindings.
-    /// Can be driven manually, via test harnesses, or automatically through engine update loops.
+    /// Polls every active binding once per tick. Bindings register while their element is attached to a panel
+    /// and unregister when it detaches, so the runner never keeps a detached element alive.
+    /// In play mode the tick comes from <see cref="BindingDriver"/> in LateUpdate; tests and tools may call
+    /// <see cref="UpdateAll"/> directly. UI Toolkit is single-threaded, so this is not thread-safe.
     /// </summary>
     public static class BindingRunner
     {
-        private static readonly List<IBinding> _bindings = new();
-        private static readonly List<IBinding> _bindingsToUpdate = new();
+        private static readonly HashSet<IBinding> _active = new();
+        private static readonly List<IBinding> _snapshot = new();
+        private static bool _updating;
 
-        /// <summary>
-        /// Gets the current number of active bindings registered with the runner.
-        /// </summary>
-        public static int ActiveBindingCount
-        {
-            get
-            {
-                lock (_bindings)
-                {
-                    return _bindings.Count;
-                }
-            }
-        }
+        public static int ActiveBindingCount => _active.Count;
 
-        /// <summary>
-        /// Registers a binding to receive updates from the centralized runner.
-        /// </summary>
         public static void Register(IBinding binding)
         {
             if (binding == null) throw new ArgumentNullException(nameof(binding));
-
-            lock (_bindings)
-            {
-                if (!_bindings.Contains(binding))
-                {
-                    _bindings.Add(binding);
-                }
-            }
+            _active.Add(binding);
         }
 
-        /// <summary>
-        /// Unregisters a binding from the centralized runner.
-        /// </summary>
         public static bool Unregister(IBinding binding)
         {
-            if (binding == null) return false;
-
-            lock (_bindings)
-            {
-                return _bindings.Remove(binding);
-            }
+            return binding != null && _active.Remove(binding);
         }
 
         /// <summary>
-        /// Updates all registered bindings.
-        /// Returns the number of bindings that performed a mutation.
+        /// Updates all active bindings and returns how many applied a change.
+        /// A binding unregistered by an earlier binding's update in the same tick is skipped.
         /// </summary>
         public static int UpdateAll()
         {
-            _bindingsToUpdate.Clear();
+            if (_updating) return 0;
 
-            lock (_bindings)
+            _updating = true;
+            var updatedCount = 0;
+            try
             {
-                // Prune any disposed / unbound bindings
-                for (var i = _bindings.Count - 1; i >= 0; i--)
+                _snapshot.AddRange(_active);
+                foreach (var binding in _snapshot)
                 {
-                    if (!_bindings[i].IsBound)
+                    if (binding.IsActive && binding.Update())
                     {
-                        _bindings.RemoveAt(i);
+                        updatedCount++;
                     }
                 }
-
-                _bindingsToUpdate.AddRange(_bindings);
             }
-
-            var updatedCount = 0;
-            foreach (var binding in _bindingsToUpdate)
+            finally
             {
-                if (binding.IsBound && binding.Update())
-                {
-                    updatedCount++;
-                }
+                _snapshot.Clear();
+                _updating = false;
             }
 
-            _bindingsToUpdate.Clear();
             return updatedCount;
         }
 
@@ -96,11 +65,16 @@ namespace Platonic.UIToolkit
         /// </summary>
         public static void Clear()
         {
-            lock (_bindings)
-            {
-                _bindings.Clear();
-            }
-            _bindingsToUpdate.Clear();
+            _active.Clear();
+        }
+
+        // Statics survive when domain reload is disabled for Enter Play Mode.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            _active.Clear();
+            _snapshot.Clear();
+            _updating = false;
         }
     }
 }

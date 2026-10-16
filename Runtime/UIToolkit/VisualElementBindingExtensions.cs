@@ -18,12 +18,44 @@ namespace Platonic.UIToolkit
         public static VisualElementFieldBinding<TElement, TValue> Bind<TElement, TValue>(
             this TElement element,
             IVersionedValue<TValue> source,
-            Action<TElement, TValue> apply,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            Action<TElement, TValue> apply)
             where TElement : VisualElement
         {
-            return new VisualElementFieldBinding<TElement, TValue>(element, source, apply, autoSchedule, registerWithRunner);
+            return new VisualElementFieldBinding<TElement, TValue>(element, source, apply);
+        }
+
+        /// <summary>
+        /// Creates a binding with no source yet. Point it at one with <c>Rebind</c>. Use this for recycled elements
+        /// (ListView rows): create the slot once in makeItem and rebind it in bindItem.
+        /// </summary>
+        public static VisualElementFieldBinding<TElement, TValue> BindSlot<TElement, TValue>(
+            this TElement element,
+            Action<TElement, TValue> apply)
+            where TElement : VisualElement
+        {
+            return new VisualElementFieldBinding<TElement, TValue>(element, null, apply);
+        }
+
+        /// <summary>
+        /// Slot for the text of a TextElement. Point it at a source with <c>Rebind</c>.
+        /// </summary>
+        public static VisualElementFieldBinding<TElement, string> BindTextSlot<TElement>(this TElement element)
+            where TElement : TextElement
+        {
+            return element.BindSlot<TElement, string>((el, val) => el.text = val);
+        }
+
+        /// <summary>
+        /// Toggles a USS class on the element from a boolean source.
+        /// </summary>
+        public static VisualElementFieldBinding<VisualElement, bool> BindClass(
+            this VisualElement element,
+            string className,
+            IVersionedValue<bool> source)
+        {
+            if (string.IsNullOrEmpty(className)) throw new ArgumentException("Class name is required.", nameof(className));
+
+            return element.Bind(source, (el, enabled) => el.EnableInClassList(className, enabled));
         }
 
         /// <summary>
@@ -33,15 +65,13 @@ namespace Platonic.UIToolkit
             this TElement element,
             IData data,
             IFieldName<TValue> fieldName,
-            Action<TElement, TValue> apply,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            Action<TElement, TValue> apply)
             where TElement : VisualElement
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
 
-            return element.Bind(data.GetField(fieldName), apply, autoSchedule, registerWithRunner);
+            return element.Bind(data.GetField(fieldName), apply);
         }
 
         /// <summary>
@@ -49,12 +79,10 @@ namespace Platonic.UIToolkit
         /// </summary>
         public static VisualElementFieldBinding<TElement, string> BindText<TElement>(
             this TElement element,
-            IVersionedValue<string> source,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            IVersionedValue<string> source)
             where TElement : TextElement
         {
-            return element.Bind(source, (el, val) => el.text = val, autoSchedule, registerWithRunner);
+            return element.Bind(source, (el, val) => el.text = val);
         }
 
         /// <summary>
@@ -63,13 +91,11 @@ namespace Platonic.UIToolkit
         public static VisualElementFieldBinding<TElement, TValue> BindText<TElement, TValue>(
             this TElement element,
             IVersionedValue<TValue> source,
-            Func<TValue, string> formatter,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            Func<TValue, string> formatter)
             where TElement : TextElement
         {
             if (formatter == null) throw new ArgumentNullException(nameof(formatter));
-            return element.Bind(source, (el, val) => el.text = formatter(val), autoSchedule, registerWithRunner);
+            return element.Bind(source, (el, val) => el.text = formatter(val));
         }
 
         /// <summary>
@@ -78,15 +104,13 @@ namespace Platonic.UIToolkit
         public static VisualElementFieldBinding<TElement, string> BindText<TElement>(
             this TElement element,
             IData data,
-            IFieldName<string> fieldName,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            IFieldName<string> fieldName)
             where TElement : TextElement
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
 
-            return element.BindText(data.GetField(fieldName), autoSchedule, registerWithRunner);
+            return element.BindText(data.GetField(fieldName));
         }
 
         /// <summary>
@@ -96,15 +120,13 @@ namespace Platonic.UIToolkit
             this TElement element,
             IData data,
             IFieldName<TValue> fieldName,
-            Func<TValue, string> formatter,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            Func<TValue, string> formatter)
             where TElement : TextElement
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
 
-            return element.BindText(data.GetField(fieldName), formatter, autoSchedule, registerWithRunner);
+            return element.BindText(data.GetField(fieldName), formatter);
         }
 
         /// <summary>
@@ -113,15 +135,11 @@ namespace Platonic.UIToolkit
         public static VisualElementFieldBinding<VisualElement, bool> BindDisplay(
             this VisualElement element,
             IVersionedValue<bool> isVisible,
-            DisplayStyle visibleDisplay = DisplayStyle.Flex,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            DisplayStyle visibleDisplay = DisplayStyle.Flex)
         {
             return element.Bind(
                 isVisible,
-                (el, visible) => el.style.display = visible ? visibleDisplay : DisplayStyle.None,
-                autoSchedule,
-                registerWithRunner);
+                (el, visible) => el.style.display = visible ? visibleDisplay : DisplayStyle.None);
         }
 
         /// <summary>
@@ -129,15 +147,11 @@ namespace Platonic.UIToolkit
         /// </summary>
         public static VisualElementFieldBinding<VisualElement, DisplayStyle> BindDisplay(
             this VisualElement element,
-            IVersionedValue<DisplayStyle> displayStyle,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            IVersionedValue<DisplayStyle> displayStyle)
         {
             return element.Bind(
                 displayStyle,
-                (el, display) => el.style.display = display,
-                autoSchedule,
-                registerWithRunner);
+                (el, display) => el.style.display = display);
         }
 
         /// <summary>
@@ -147,14 +161,12 @@ namespace Platonic.UIToolkit
             this VisualElement element,
             IData data,
             IFieldName<bool> fieldName,
-            DisplayStyle visibleDisplay = DisplayStyle.Flex,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            DisplayStyle visibleDisplay = DisplayStyle.Flex)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
 
-            return element.BindDisplay(data.GetField(fieldName), visibleDisplay, autoSchedule, registerWithRunner);
+            return element.BindDisplay(data.GetField(fieldName), visibleDisplay);
         }
 
         /// <summary>
@@ -162,11 +174,9 @@ namespace Platonic.UIToolkit
         /// </summary>
         public static VisualElementFieldBinding<ProgressBar, float> BindProgressBar(
             this ProgressBar progressBar,
-            IVersionedValue<float> source,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            IVersionedValue<float> source)
         {
-            return progressBar.Bind(source, (pb, val) => pb.value = val, autoSchedule, registerWithRunner);
+            return progressBar.Bind(source, (pb, val) => pb.value = val);
         }
 
         /// <summary>
@@ -175,14 +185,12 @@ namespace Platonic.UIToolkit
         public static VisualElementFieldBinding<ProgressBar, float> BindProgressBar(
             this ProgressBar progressBar,
             IData data,
-            IFieldName<float> fieldName,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            IFieldName<float> fieldName)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
 
-            return progressBar.BindProgressBar(data.GetField(fieldName), autoSchedule, registerWithRunner);
+            return progressBar.BindProgressBar(data.GetField(fieldName));
         }
 
         /// <summary>
@@ -190,11 +198,9 @@ namespace Platonic.UIToolkit
         /// </summary>
         public static VisualElementFieldBinding<VisualElement, bool> BindEnabled(
             this VisualElement element,
-            IVersionedValue<bool> isEnabled,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            IVersionedValue<bool> isEnabled)
         {
-            return element.Bind(isEnabled, (el, enabled) => el.SetEnabled(enabled), autoSchedule, registerWithRunner);
+            return element.Bind(isEnabled, (el, enabled) => el.SetEnabled(enabled));
         }
 
         /// <summary>
@@ -203,14 +209,12 @@ namespace Platonic.UIToolkit
         public static VisualElementFieldBinding<VisualElement, bool> BindEnabled(
             this VisualElement element,
             IData data,
-            IFieldName<bool> fieldName,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            IFieldName<bool> fieldName)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
 
-            return element.BindEnabled(data.GetField(fieldName), autoSchedule, registerWithRunner);
+            return element.BindEnabled(data.GetField(fieldName));
         }
 
         /// <summary>
@@ -218,12 +222,10 @@ namespace Platonic.UIToolkit
         /// </summary>
         public static VisualElementFieldBinding<TField, TValue> BindValue<TField, TValue>(
             this TField field,
-            IVersionedValue<TValue> source,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            IVersionedValue<TValue> source)
             where TField : VisualElement, INotifyValueChanged<TValue>
         {
-            return field.Bind(source, (f, val) => f.value = val, autoSchedule, registerWithRunner);
+            return field.Bind(source, (f, val) => f.value = val);
         }
 
         /// <summary>
@@ -232,15 +234,13 @@ namespace Platonic.UIToolkit
         public static VisualElementFieldBinding<TField, TValue> BindValue<TField, TValue>(
             this TField field,
             IData data,
-            IFieldName<TValue> fieldName,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            IFieldName<TValue> fieldName)
             where TField : VisualElement, INotifyValueChanged<TValue>
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
 
-            return field.BindValue(data.GetField(fieldName), autoSchedule, registerWithRunner);
+            return field.BindValue(data.GetField(fieldName));
         }
 
         /// <summary>
@@ -248,15 +248,13 @@ namespace Platonic.UIToolkit
         /// </summary>
         public static ListViewBinding<T> BindListView<T>(
             this ListView listView,
-            IVersionedList<T> list,
+            IVersionedEnumerable<T> list,
             Func<VisualElement>? makeItem = null,
             Action<VisualElement, T>? bindItem = null,
             Action<VisualElement, T>? unbindItem = null,
-            Action<VisualElement>? destroyItem = null,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            Action<VisualElement>? destroyItem = null)
         {
-            return new ListViewBinding<T>(listView, list, makeItem, bindItem, unbindItem, destroyItem, autoSchedule, registerWithRunner);
+            return new ListViewBinding<T>(listView, list, makeItem, bindItem, unbindItem, destroyItem);
         }
 
         /// <summary>
@@ -264,15 +262,13 @@ namespace Platonic.UIToolkit
         /// </summary>
         public static ListViewBinding<T> BindListView<T>(
             this ListView listView,
-            IVersionedList<T> list,
+            IVersionedEnumerable<T> list,
             Func<VisualElement> makeItem,
             Action<VisualElement, int> bindIndexItem,
             Action<VisualElement, int>? unbindIndexItem = null,
-            Action<VisualElement>? destroyItem = null,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            Action<VisualElement>? destroyItem = null)
         {
-            return new ListViewBinding<T>(listView, list, makeItem, bindIndexItem, unbindIndexItem, destroyItem, autoSchedule, registerWithRunner);
+            return new ListViewBinding<T>(listView, list, makeItem, bindIndexItem, unbindIndexItem, destroyItem);
         }
     }
 }

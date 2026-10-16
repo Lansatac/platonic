@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using UnityEditor;
 using Platonic.Collections;
 using Platonic.Core;
 using Platonic.UIToolkit;
@@ -11,6 +12,32 @@ namespace Platonic.Editor.Tests.UIToolkit
 {
     public class BindingTests
     {
+        private sealed class TestWindow : EditorWindow { }
+
+        private sealed class StubVersioned<T> : IVersionedValue<T>
+        {
+            public ulong Version { get; set; }
+            public T Value { get; set; } = default!;
+        }
+
+        private TestWindow? _window;
+
+        /// <summary>A root that is really attached to a panel, so attach/detach events fire.</summary>
+        private VisualElement CreateAttachedRoot()
+        {
+            _window = EditorWindow.CreateInstance<TestWindow>();
+            _window.Show();
+            return _window.rootVisualElement;
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (_window != null) _window.Close();
+            _window = null;
+            BindingRunner.Clear();
+        }
+
         private readonly FieldName<string> _nameField = new(101, "Name");
         private readonly FieldName<int> _countField = new(102, "Count");
         private readonly FieldName<float> _progressField = new(103, "Progress");
@@ -158,28 +185,161 @@ namespace Platonic.Editor.Tests.UIToolkit
         }
 
         [Test]
-        public void BindingRunner_UpdateAll_TicksAllRegisteredBindings()
+        public void UnattachedBinding_IsNotPolledByRunner()
         {
-            var field1 = new MutableField<string>(_nameField, "One");
-            var field2 = new MutableField<int>(_countField, 1);
+            var field = new MutableField<string>(_nameField, "One");
+            var label = new Label();
+            var binding = label.BindText(field);
 
-            var label1 = new Label();
-            var label2 = new Label();
+            Assert.That(binding.IsActive, Is.False);
+            Assert.That(BindingRunner.ActiveBindingCount, Is.EqualTo(0));
 
-            var b1 = label1.BindText(field1);
-            var b2 = label2.BindText(field2, c => c.ToString());
+            field.Value = "Two";
+            BindingRunner.UpdateAll();
+            Assert.That(label.text, Is.EqualTo("One"));
+        }
 
-            field1.Value = "Two";
-            field2.Value = 2;
+        [Test]
+        public void AttachedBinding_IsPolledByRunner_AndReleasedOnDetach()
+        {
+            var field = new MutableField<string>(_nameField, "One");
+            var root = CreateAttachedRoot();
+            var label = new Label();
+            root.Add(label);
 
-            var updatedCount = BindingRunner.UpdateAll();
+            var binding = label.BindText(field);
+            Assert.That(binding.IsActive, Is.True);
+            Assert.That(BindingRunner.ActiveBindingCount, Is.EqualTo(1));
 
-            Assert.That(updatedCount, Is.GreaterThanOrEqualTo(2));
-            Assert.That(label1.text, Is.EqualTo("Two"));
-            Assert.That(label2.text, Is.EqualTo("2"));
+            field.Value = "Two";
+            Assert.That(BindingRunner.UpdateAll(), Is.EqualTo(1));
+            Assert.That(label.text, Is.EqualTo("Two"));
 
-            b1.Dispose();
-            b2.Dispose();
+            label.RemoveFromHierarchy();
+            Assert.That(binding.IsActive, Is.False);
+            Assert.That(BindingRunner.ActiveBindingCount, Is.EqualTo(0));
+
+            field.Value = "Three";
+            BindingRunner.UpdateAll();
+            Assert.That(label.text, Is.EqualTo("Two"));
+        }
+
+        [Test]
+        public void ReattachedBinding_CatchesUpOnChangesMadeWhileDetached()
+        {
+            var field = new MutableField<string>(_nameField, "One");
+            var root = CreateAttachedRoot();
+            var label = new Label();
+            root.Add(label);
+            label.BindText(field);
+
+            label.RemoveFromHierarchy();
+            field.Value = "Two";
+            root.Add(label);
+
+            Assert.That(label.text, Is.EqualTo("Two"));
+        }
+
+        [Test]
+        public void Binding_AppliesInitialValue_WhenSourceVersionIsNone()
+        {
+            var source = new StubVersioned<string> { Version = Versions.None, Value = "Initial" };
+            var label = new Label();
+
+            label.BindText(source);
+
+            Assert.That(label.text, Is.EqualTo("Initial"));
+        }
+
+        [Test]
+        public void Rebind_SwitchesSource_AndIgnoresTheOldOne()
+        {
+            var first = new MutableField<string>(_nameField, "First");
+            var second = new MutableField<string>(_nameField, "Second");
+            var label = new Label();
+            var binding = label.BindText(first);
+
+            binding.Rebind(second);
+            Assert.That(label.text, Is.EqualTo("Second"));
+
+            first.Value = "Stale";
+            binding.Update();
+            Assert.That(label.text, Is.EqualTo("Second"));
+
+            second.Value = "SecondUpdated";
+            binding.Update();
+            Assert.That(label.text, Is.EqualTo("SecondUpdated"));
+        }
+
+        [Test]
+        public void Slot_AppliesNothing_UntilRebound()
+        {
+            var label = new Label { text = "Untouched" };
+            var slot = label.BindTextSlot();
+
+            Assert.That(slot.Update(), Is.False);
+            Assert.That(label.text, Is.EqualTo("Untouched"));
+
+            slot.Rebind(new MutableField<string>(_nameField, "Bound"));
+            Assert.That(label.text, Is.EqualTo("Bound"));
+        }
+
+        [Test]
+        public void BindingScope_Dispose_UnbindsEverything()
+        {
+            var field = new MutableField<string>(_nameField, "One");
+            var label = new Label();
+            var scope = new BindingScope();
+            var binding = scope.Add(label.BindText(field));
+
+            scope.Dispose();
+
+            Assert.That(binding.IsBound, Is.False);
+            field.Value = "Two";
+            binding.Update();
+            Assert.That(label.text, Is.EqualTo("One"));
+        }
+
+        [Test]
+        public void BindClass_TogglesClassFromSource()
+        {
+            var flag = new MutableField<bool>(_activeField, false);
+            var element = new VisualElement();
+            var binding = element.BindClass("is-active", flag);
+            Assert.That(element.ClassListContains("is-active"), Is.False);
+
+            flag.Value = true;
+            binding.Update();
+            Assert.That(element.ClassListContains("is-active"), Is.True);
+        }
+
+        [Test]
+        public void ListView_RecycledRow_UsesOneSlotRebound_NotNewBindingsPerBind()
+        {
+            var rowA = new MutableField<string>(_nameField, "A");
+            var rowB = new MutableField<string>(_nameField, "B");
+            var rows = new VersionedList<IVersionedValue<string>> { rowA, rowB };
+            var listView = new ListView();
+
+            var slots = new List<VisualElementFieldBinding<Label, string>>();
+            listView.BindListView(
+                rows,
+                makeItem: () =>
+                {
+                    var label = new Label();
+                    slots.Add(label.BindTextSlot());
+                    return label;
+                },
+                bindItem: (element, source) =>
+                    slots[0].Rebind(source));
+
+            var recycled = listView.makeItem();
+            listView.bindItem(recycled, 0);
+            Assert.That(((Label)recycled).text, Is.EqualTo("A"));
+            listView.bindItem(recycled, 1);
+            Assert.That(((Label)recycled).text, Is.EqualTo("B"));
+
+            Assert.That(slots.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -223,7 +383,7 @@ namespace Platonic.Editor.Tests.UIToolkit
                 });
 
             Assert.That(binding.IsBound, Is.True);
-            Assert.That(listView.itemsSource, Is.SameAs(list));
+            Assert.That(listView.itemsSource.Count, Is.EqualTo(2));
             Assert.That(binding.CachedVersion, Is.EqualTo(list.Version));
 
             // No version change -> update returns false
@@ -301,7 +461,7 @@ namespace Platonic.Editor.Tests.UIToolkit
                 bindIndexItem: (el, index) => boundIndices.Add(index));
 
             Assert.That(binding.IsBound, Is.True);
-            Assert.That(listView.itemsSource, Is.SameAs(list));
+            Assert.That(listView.itemsSource.Count, Is.EqualTo(3));
 
             // Verify bindItem callback works
             var label = new Label();

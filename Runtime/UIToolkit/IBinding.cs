@@ -6,7 +6,8 @@ using UnityEngine.UIElements;
 namespace Platonic.UIToolkit
 {
     /// <summary>
-    /// Represents an active data binding between a VisualElement and a Platonic versioned source.
+    /// An active link between a VisualElement and a Platonic versioned source.
+    /// Note: unrelated to <c>UnityEngine.UIElements.IBinding</c>, which belongs to Unity's SerializedObject binding.
     /// </summary>
     public interface IBinding : IDisposable
     {
@@ -16,28 +17,33 @@ namespace Platonic.UIToolkit
         VisualElement Target { get; }
 
         /// <summary>
-        /// The versioned data source.
+        /// The versioned data source, or null for a slot that has not been pointed at a source yet.
         /// </summary>
-        IVersioned Source { get; }
+        IVersioned? Source { get; }
 
         /// <summary>
-        /// The version of the source at the time of the last update.
+        /// The version of the source at the time of the last applied update.
         /// </summary>
         ulong CachedVersion { get; }
 
         /// <summary>
-        /// Whether the binding is currently active.
+        /// False once <see cref="Unbind"/> has been called. A binding never becomes bound again.
         /// </summary>
         bool IsBound { get; }
 
         /// <summary>
-        /// Checks if the source version changed since the last update and, if so, applies the new value.
-        /// Returns true if an update was applied; false if the version was unchanged or the binding is inactive.
+        /// True while the target is attached to a panel. Only active bindings are polled by <see cref="BindingRunner"/>.
+        /// </summary>
+        bool IsActive { get; }
+
+        /// <summary>
+        /// Applies the source to the target if its version changed since the last update.
+        /// Returns true if an update was applied; false if nothing changed or the binding is unbound.
         /// </summary>
         bool Update();
 
         /// <summary>
-        /// Deactivates the binding, cancelling schedules and unregistering from runners.
+        /// Permanently detaches the binding from its element and from the runner.
         /// </summary>
         void Unbind();
     }
@@ -48,6 +54,6 @@ namespace Platonic.UIToolkit
     public interface IBinding<out TElement, out TValue> : IBinding where TElement : VisualElement
     {
         new TElement Target { get; }
-        new IVersionedValue<TValue> Source { get; }
+        new IVersionedValue<TValue>? Source { get; }
     }
 }

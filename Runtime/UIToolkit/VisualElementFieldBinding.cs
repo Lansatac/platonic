@@ -6,121 +6,60 @@ using UnityEngine.UIElements;
 namespace Platonic.UIToolkit
 {
     /// <summary>
-    /// Binds a VisualElement property or action to an IVersionedValue source.
-    /// Tracks cached version against source version and applies updates only on version change.
+    /// Applies an IVersionedValue to a VisualElement whenever the source's version changes.
+    /// The source can be replaced with <see cref="Rebind"/>, so one binding can serve a recycled element
+    /// (for example a ListView row) for its whole life instead of being recreated on every rebind.
     /// </summary>
-    public class VisualElementFieldBinding<TElement, TValue> : IBinding<TElement, TValue>
+    public class VisualElementFieldBinding<TElement, TValue> : ElementBinding<TElement>, IBinding<TElement, TValue>
         where TElement : VisualElement
     {
         private readonly Action<TElement, TValue> _apply;
-        private readonly bool _autoSchedule;
-        private readonly EventCallback<AttachToPanelEvent> _attachCallback;
-        private readonly EventCallback<DetachFromPanelEvent> _detachCallback;
-        private IVisualElementScheduledItem? _scheduledItem;
+        private bool _hasApplied;
 
-        public TElement Target { get; }
-        VisualElement IBinding.Target => Target;
+        public IVersionedValue<TValue>? Source { get; private set; }
 
-        public IVersionedValue<TValue> Source { get; }
-        IVersioned IBinding.Source => Source;
+        protected override IVersioned? SourceCore => Source;
 
         public IField<TValue>? Field => Source as IField<TValue>;
 
-        public ulong CachedVersion { get; private set; } = Versions.None;
-
-        public bool IsBound { get; private set; } = true;
-
+        /// <param name="source">The initial source. Null creates an unbound slot to be pointed at a source with <see cref="Rebind"/>.</param>
         public VisualElementFieldBinding(
             TElement target,
-            IVersionedValue<TValue> source,
-            Action<TElement, TValue> apply,
-            bool autoSchedule = true,
-            bool registerWithRunner = true)
+            IVersionedValue<TValue>? source,
+            Action<TElement, TValue> apply)
+            : base(target)
         {
-            Target = target ?? throw new ArgumentNullException(nameof(target));
-            Source = source ?? throw new ArgumentNullException(nameof(source));
             _apply = apply ?? throw new ArgumentNullException(nameof(apply));
-            _autoSchedule = autoSchedule;
-
-            _attachCallback = _ => OnAttachToPanel();
-            _detachCallback = _ => OnDetachFromPanel();
-            Target.RegisterCallback(_attachCallback);
-            Target.RegisterCallback(_detachCallback);
-
-            if (registerWithRunner)
-            {
-                BindingRunner.Register(this);
-            }
-
-            if (_autoSchedule && Target.panel != null)
-            {
-                StartScheduling();
-            }
-
-            // Perform initial binding update
-            Update();
-        }
-
-        private void StartScheduling()
-        {
-            if (_scheduledItem == null)
-            {
-                _scheduledItem = Target.schedule.Execute(() => Update());
-            }
-            else
-            {
-                _scheduledItem.Resume();
-            }
-        }
-
-        private void OnAttachToPanel()
-        {
-            if (!IsBound) return;
-
-            if (_autoSchedule)
-            {
-                StartScheduling();
-            }
+            Source = source;
 
             Update();
         }
 
-        private void OnDetachFromPanel()
+        /// <summary>
+        /// Points the binding at a different source (or null to stop updating) and applies it immediately.
+        /// The previously applied value stays on the element until the new source applies.
+        /// </summary>
+        public void Rebind(IVersionedValue<TValue>? source)
         {
-            _scheduledItem?.Pause();
+            Source = source;
+            _hasApplied = false;
+            CachedVersion = Versions.None;
+
+            Update();
         }
 
-        public bool Update()
+        protected override bool Poll()
         {
-            if (!IsBound) return false;
+            var source = Source;
+            if (source == null) return false;
 
-            if (CachedVersion != Source.Version)
-            {
-                CachedVersion = Source.Version;
-                _apply(Target, Source.Value);
-                return true;
-            }
+            var version = source.Version;
+            if (_hasApplied && version == CachedVersion) return false;
 
-            return false;
-        }
-
-        public void Unbind()
-        {
-            if (!IsBound) return;
-
-            IsBound = false;
-            _scheduledItem?.Pause();
-            _scheduledItem = null;
-
-            Target.UnregisterCallback(_attachCallback);
-            Target.UnregisterCallback(_detachCallback);
-
-            BindingRunner.Unregister(this);
-        }
-
-        public void Dispose()
-        {
-            Unbind();
+            _hasApplied = true;
+            CachedVersion = version;
+            _apply(Target, source.Value);
+            return true;
         }
     }
 }

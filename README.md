@@ -78,6 +78,8 @@ panel.BindDisplay(isVisible);
 buyButton.BindEnabled(canAfford);
 ```
 
+A binding is polled only while its element is attached to a panel, once per frame (play mode) from LateUpdate. For recycled `ListView` rows, create bindings once with `BindTextSlot()` / `BindSlot(apply)` in `makeItem` and point them at the item with `Rebind(source)` in `bindItem`.
+
 For uGUI, renderer components such as `TextRenderer` do the same from the inspector: give one a data source, a format string (`{0} / {1}`), and the fields to watch.
 
 ### Versioned collections
